@@ -93,17 +93,24 @@ def read_in():
 
 def main():
     data = read_in()
-    folders = data.get('folder_id_include')
-    project_patterns = data.get('project_id_include_pattern')
-    project_exclusion = data.get('project_id_exclude')
+    folders = data.get('folder_id_include').split(',')
+    project_patterns = data.get('project_id_include_pattern').split(',')
+    project_exclusion = data.get('project_id_exclude').split(',')
+
+    while '' in folders:
+        folders.remove('')
+    while '' in project_patterns:
+        project_patterns.remove('')
+    while '' in project_exclusion:
+        project_exclusion.remove('')
 
     fr_pid_list = []
-    if folders and len(folders) > 0:
-        for f in folders.split(','):
+    if len(folders) > 0:
+        for f in folders:
             fr_pid_list.append(f)
             fr_pid_list.extend(get_folderids(str(f)))
 
-    projects = filter_projects(fr_pid_list, project_patterns.split(','), project_exclusion.split(','))
+    projects = filter_projects(fr_pid_list, project_patterns, project_exclusion)
 
     jsondata = {'final_projects_ids': ','.join([str(elem).replace('"', '') for elem in projects])}
     sys.stdout.write(json.dumps(jsondata))

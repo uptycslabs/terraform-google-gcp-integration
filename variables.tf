@@ -7,7 +7,7 @@ variable "gcp_region" {
 variable "parent_organizations_id" {
   type        = string
   description = "The GCP parent organizations id where planning to create host projects and resources. "
-  default     = "12345678987"
+  default     = "12345678222"
 }
 
 variable "is_host_project_exists" {
@@ -25,7 +25,7 @@ variable "host_folder_name" {
 variable "host_project_id" {
   type        = string
   description = "The GCP project ID where planning to create resources"
-  default     = "test-project-q683x6"
+  default     = "test-project-q683x63"
 }
 
 variable "host_project_tags" {
@@ -45,9 +45,9 @@ variable "projects_input_patterns" {
   type = map
   description = "Filtering projects based on input patterns for integration. "
   default = {
-    folder_id_include           = "12345678923"
-    project_id_include_pattern  = "^ops*,*ops*,disembark,pork"
-    project_id_exclude          = "cacharya-ops-503,constant-racer-32561,dev-project-327714"
+    folder_id_include           = "12345678222,111111111111"
+    project_id_include_pattern  = "*ops*"
+    project_id_exclude          = "cacharya-ops-503"
   }
 }
 

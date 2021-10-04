@@ -23,16 +23,10 @@ The following dependencies must be available:
 * The user account should have access to the GCP project for perform operation.
 * Service account or user credentials with the following privileged roles must be used to provision the resources of this module:
   
-  * To manage multiple projects & folders User/Principal need to provision below resourcemanager roles.
+  * To manage multiple projects & folders User/Principal need to provision below roles in organization label.
     * projectCreator
-    * Organization Administrator
     * Folder Admin
-      
-  * For other resources User/Principal need to provision below IAM roles .   
-    * Organization Administrator
-    * Service Account Admin
     * IAM Workload Identity Pool Admin
-    * Project IAM Admin
 
 ## 2. Install terraform
 
@@ -40,19 +34,27 @@ This module is meant for use with Terraform version = "~> 3.61.0".
 
 ## 3. Install Google Cloud SDK 
 
-## 4. Install python3 and google-api-python-client
+## 4. Install python3, google-api-python-client & oauth2client
 ```
 pip3 install --upgrade google-api-python-client
+pip3 install --upgrade oauth2client
+```
+
+* Notes :- If error comes to install google-api-python-client and oauth2client then go for install these libraries in a virtualenv using pip3.
+* Installation in Mac/Linux
+```
+pip3 install virtualenv
+virtualenv <your-env>
+source <your-env>/bin/activate
+<your-env>/bin/pip3 install --upgrade google-api-python-client
+<your-env>/bin/pip3 install --upgrade oauth2client
 ```
 
 ## 5. Authenticate
 
 ```
 Login with ADC
-  - (Optional) "gcloud config configurations create < config name>" 
   - "gcloud auth application-default login"
-  - export GOOGLE_APPLICATION_CREDENTIALS="<local path>/service-account-file.json"
-  - "gcloud config set project < project Id >" # If user has multiple projects 
 ```
 
 ## 6. Use terraform module steps
