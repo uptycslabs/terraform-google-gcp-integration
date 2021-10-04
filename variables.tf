@@ -7,7 +7,7 @@ variable "gcp_region" {
 variable "parent_organizations_id" {
   type        = string
   description = "The GCP parent organizations id where planning to create host projects and resources. "
-  default     = "604124743451"
+  default     = "12345678987"
 }
 
 variable "is_host_project_exists" {
@@ -45,7 +45,7 @@ variable "projects_input_patterns" {
   type = map
   description = "Filtering projects based on input patterns for integration. "
   default = {
-    folder_id_include           = "687182092621"
+    folder_id_include           = "12345678923"
     project_id_include_pattern  = "^ops*,*ops*,disembark,pork"
     project_id_exclude          = "cacharya-ops-503,constant-racer-32561,dev-project-327714"
   }
@@ -68,7 +68,7 @@ variable "gcp_wip_provider_id" {
 variable "host_aws_account_id" {
   type        = string
   description = "The deployer host AWS account ID."
-  default     = "014988765081"
+  default     = "12345678222"
 }
 
 variable "host_aws_instance_role" {
