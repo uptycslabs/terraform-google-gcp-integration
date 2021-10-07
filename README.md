@@ -60,6 +60,7 @@ Login with ADC
 ## 6. Use terraform module steps
 
   * Create a <filename>.tf file, paste below codes and modify as needed.
+  * For inputs parameters please refer ## Inputs section below.
 ```
 module "create-gcp-cred" {
   source                    = "github.com/uptycslabs/terraform-google-cred-config"
@@ -101,6 +102,14 @@ output "filtered-projects-details" {
 
 ```
 
+## 7.Execute Terraform script to get credentials.json and project-list.json
+```
+$ terraform init
+$ terraform plan
+$ terraform apply # NOTE: Once terraform successfully applied, it will create "credentials.json" and "project-list.json" files.
+$ terraform output -json filtered-projects-details
+```
+
 ## Inputs
 
 | Name                      | Description                                                                                                        | Type          | Default          |
@@ -133,11 +142,3 @@ output "filtered-projects-details" {
 
 2. `credentials.json` is only created once. To re create the file use command returned by `command-to-generate-gcp-cred-config` output.
 3. `project-list.json` will be created once apply done , Get json data for UI integration , for regenerate the json data use `terraform output -json filtered-projects-details` .
-
-## 6.Execute Terraform script to get credentials JSON
-```
-$ terraform init
-$ terraform plan
-$ terraform apply # NOTE: Once terraform successfully applied, it will create "credentials.json" and "project-list.json" files.
-$ terraform output -json filtered-projects-details
-```
