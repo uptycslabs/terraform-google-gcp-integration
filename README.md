@@ -90,16 +90,13 @@ module "create-gcp-cred" {
   gcp_wip_provider_id   = "aws-id-provider-test"
 }
 
-output "new-service-account-email" {
-  value = module.create-gcp-cred.new-service-account-email
-}
 
 output "command-to-generate-gcp-cred-config" {
   value = module.create-gcp-cred.command-to-generate-gcp-cred-config
 }
 
-output "filter-integration-project-list" {
-  value = module.create-gcp-cred.filter-integration-project-lis
+output "filtered-projects-details" {
+  value = module.create-gcp-cred.filtered-projects-details
 }
 
 ```
@@ -114,7 +111,7 @@ output "filter-integration-project-list" {
 | host_project_id           | Pass unique host project ID where planning to create resources.                                                    | `string`      | `""`             |
 | service_account_name      | Pass new service account name.                                                                                     | `string`      | `"sa-for-test"`  |
 | host_project_tags         | (Optional) host project tags .                                                                                     | `map(string)` | `{"uptycs-integration"="true"}` |
-| projects_input_patterns   | Filtering projects based on input patterns for integration.                                                        | `map(string)` | `{}`             |
+| projects_input_patterns   | Filtering projects based on input patterns for integration.  { folder_id_include = "" project_id_include_pattern = "" project_id_exclude = "" }                                                       | `map(string)` | `{}`             |
 | host_aws_account_id       | The deployer host aws account id.                                                                                  | `number`      | `""`             |
 | host_aws_instance_role    | The attached deployer host aws role name.                                                                          | `string`      | `""`             |
 | gcp_workload_identity     | Workload Identity Pool to allow Uptycs integration via AWS federation                                              | `string`      | `""`             |
@@ -125,9 +122,8 @@ output "filter-integration-project-list" {
 
 | Name                    | Description                                  |
 | ----------------------- | -------------------------------------------- |
-| new-service-account-email   | The deployed Service Account's email-id |
 | command-to-generate-gcp-cred-config  | For creating again same cred config json data ,please use command return by "command-to-generate-gcp-cred-config" |
-| filter-integration-project-list  | Filtering projects based on input patterns for integration. |
+| filtered-projects-details     | Filtering projects based on input patterns for integration in json format. |
 
 ## Notes
 
@@ -136,13 +132,12 @@ output "filter-integration-project-list" {
      - After `terraform destroy`, same WIP can't be created again. Modify `gcp_workload_identity` value if required.
 
 2. `credentials.json` is only created once. To re create the file use command returned by `command-to-generate-gcp-cred-config` output.
-
+3. `project-list.json` will be created once apply done , Get json data for UI integration , for regenerate the json data use `terraform output -json filtered-projects-details` .
 
 ## 6.Execute Terraform script to get credentials JSON
 ```
 $ terraform init
 $ terraform plan
-$ terraform apply # NOTE: Once terraform successfully applied, it will create "credentials.json" file.
+$ terraform apply # NOTE: Once terraform successfully applied, it will create "credentials.json" and "project-list.json" files.
+$ terraform output -json filtered-projects-details
 ```
-
-## 7.Store the output of filter-integration-project-list for UI integration.
