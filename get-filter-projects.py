@@ -19,7 +19,8 @@ pattern_project_ids = []
 def get_subfolder_pid(pf_pid):
     pf_pid_list = []
     try:
-        output = json.loads(sp.getoutput('gcloud resource-manager folders list --folder={} --format="json"'.format(pf_pid)))
+        output = json.loads(
+            sp.getoutput('gcloud resource-manager folders list --folder={} --format="json"'.format(pf_pid)))
         for i in range(len(output)):
             pf_pid_list.append(output[i].get('name').split('/')[1])
         return pf_pid_list
@@ -54,7 +55,6 @@ def get_pattern_match(patterns, all_pids):
 
 
 def get_projects_details(filter_list):
-
     r_list = []
     try:
         request = service.projects().list()
@@ -65,8 +65,8 @@ def get_projects_details(filter_list):
             if filter_list and len(filter_list) > 0:
                 for fl in filter_list:
                     if project['projectId'] == str(fl):
-                        data = {'projectId': project['projectId'], 'name': project['name']}
-                        r_list.append(str(data))
+                        data = {"projectId": str(project['projectId']), "name": str(project['name'])}
+                        r_list.append(data)
 
             request = service.projects().list_next(previous_request=request, previous_response=response)
         return r_list
@@ -83,7 +83,8 @@ def filter_projects(fr_pid_list, project_patterns, project_exclusion):
             # Getting project ids based on parent folder ids
             if len(fr_pid_list) > 0:
                 for fr_pid in fr_pid_list:
-                    if project['parent'].get('type') == 'folder' and project['parent'].get('id') == str(fr_pid) and project['lifecycleState'] == 'ACTIVE':
+                    if project['parent'].get('type') == 'folder' and project['parent'].get('id') == str(fr_pid) and \
+                            project['lifecycleState'] == 'ACTIVE':
                         f_project_ids.append(project['projectId'])
 
             # Getting all ACTIVE projectIds
@@ -140,7 +141,8 @@ def main():
     projects = filter_projects(fr_pid_list, project_patterns, project_exclusion)
     project_details = get_projects_details(projects)
 
-    jsondata = {'final_projects_ids': ','.join([str(elem).replace('"', '') for elem in projects]), 'details': ','.join([str(elem).replace('"', '') for elem in project_details])}
+    jsondata = {'final_projects_ids': ','.join([str(elem).replace('"', '') for elem in projects]),
+                'details': ','.join([str(elem).replace('"', '') for elem in project_details])}
     sys.stdout.write(json.dumps(jsondata))
 
 

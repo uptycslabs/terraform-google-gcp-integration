@@ -64,11 +64,10 @@ Login with ADC
 ```
 module "create-gcp-cred" {
   source                    = "github.com/uptycslabs/terraform-google-cred-config"
-  gcp_region                = "us-east1"
-  parent_organizations_id   = "1234567890"
+  organizations_id          = "1234567890"
   host_folder_name          = "test-folder"
   host_project_id           = "test-project-q683x6"
-  service_account_name      = "sa-for-cldquery"
+  service_account_name      = "sa-for-test"
   
   # (Optional) host project tags
   host_project_tags         = {"uptycs-integration"="true"}  
@@ -76,9 +75,9 @@ module "create-gcp-cred" {
   # Pass patterns to filter projects for integration
   projects_input_patterns   =  
                             {
-                             folder_id_include           = "11111111111,222222222 "
-                             project_id_include_pattern  = "^ops*,*racer*,project-id1,project-id2"
-                             project_id_exclude          = "test-project-503,test-racer-32561,dev-project-327714"
+                             folder_ids_include           = "11111111111,222222222 "
+                             project_ids_include_patterns = "^ops*,*dev*,project-id1,project-id2"
+                             project_ids_exclude          = "test-project-503,test-racer-32561,dev-project-327714"
                             }
 
       
@@ -92,12 +91,16 @@ module "create-gcp-cred" {
 }
 
 
-output "command-to-generate-gcp-cred-config" {
-  value = module.create-gcp-cred.command-to-generate-gcp-cred-config
+output "regenerate-cred-config-command" {
+  value = module.create-gcp-cred.create-cred-config-command
 }
 
-output "filtered-projects-details" {
-  value = module.create-gcp-cred.filtered-projects-details
+output "integration-projects-list" {
+  value = module.create-gcp-cred.integration-projects-list
+}
+
+output "host-project-id" {
+  value = module.create-gcp-cred.host-project-id
 }
 
 ```
@@ -105,22 +108,20 @@ output "filtered-projects-details" {
 ## 7.Execute Terraform script to get credentials.json and project-list.json
 ```
 $ terraform init
-$ terraform plan
+$ terraform plan  # Warning :- Please verify carefully before apply .
 $ terraform apply # NOTE: Once terraform successfully applied, it will create "credentials.json" and "project-list.json" files.
-$ terraform output -json filtered-projects-details
 ```
 
 ## Inputs
 
 | Name                      | Description                                                                                                        | Type          | Default          |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------- | ---------------- |
-| gcp_region                | The GCP project region where planning to create resources.                                                         | `string`      | `us-east-1`      |
-| parent_organizations_id   | The GCP parent organizations id where you wants create resources.                                                  | `string`      | `""`             |
+| organizations_id   | The GCP parent organizations id where you wants create resources.                                                  | `string`      | `""`             |
 | host_folder_name          | The folder where host project will be created.                                                                     | `string`      | `""`             |
 | host_project_id           | Pass unique host project ID where planning to create resources.                                                    | `string`      | `""`             |
-| service_account_name      | Pass new service account name.                                                                                     | `string`      | `"sa-for-test"`  |
-| host_project_tags         | (Optional) host project tags .                                                                                     | `map(string)` | `{"uptycs-integration"="true"}` |
-| projects_input_patterns   | Filtering projects based on input patterns for integration.  { folder_id_include = "" project_id_include_pattern = "" project_id_exclude = "" }                                                       | `map(string)` | `{}`             |
+| service_account_name      | Pass new service account name.                                                                                     | `string`      | `""`  |
+| host_project_tags         | (Optional) host project tags .                                                                                     | `map(string)` | `{}` |
+| projects_input_patterns   | Filtering projects based on input patterns for integration.                                                        | `map(string)` | `{ folder_ids_include = "" project_ids_include_patterns = "" project_ids_exclude = "" }`             |
 | host_aws_account_id       | The deployer host aws account id.                                                                                  | `number`      | `""`             |
 | host_aws_instance_role    | The attached deployer host aws role name.                                                                          | `string`      | `""`             |
 | gcp_workload_identity     | Workload Identity Pool to allow Uptycs integration via AWS federation                                              | `string`      | `""`             |
@@ -131,8 +132,10 @@ $ terraform output -json filtered-projects-details
 
 | Name                    | Description                                  |
 | ----------------------- | -------------------------------------------- |
-| command-to-generate-gcp-cred-config  | For creating again same cred config json data ,please use command return by "command-to-generate-gcp-cred-config" |
-| filtered-projects-details     | Filtering projects based on input patterns for integration in json format. |
+| regenerate-cred-config-command  | For creating again same cred config json file. |
+| host-project-id                 | It will return host project id.  |
+| integration-projects-list       | It will return projects list based on input patterns for integration . |
+
 
 ## Notes
 
@@ -140,5 +143,5 @@ $ terraform output -json filtered-projects-details
      - Soft-deleted provider can be restored using `UndeleteWorkloadIdentityPoolProvider`. ID cannot be re-used until the WIP is permanently deleted.
      - After `terraform destroy`, same WIP can't be created again. Modify `gcp_workload_identity` value if required.
 
-2. `credentials.json` is only created once. To re create the file use command returned by `command-to-generate-gcp-cred-config` output.
-3. `project-list.json` will be created once apply done , Get json data for UI integration , for regenerate the json data use `terraform output -json filtered-projects-details` .
+2. `credentials.json` is only created once. To re create the file use command returned by `regenerate-cred-config-command` output.
+3. `project-list.json` will be created once apply done , Get json data for UI integration  .

@@ -24,9 +24,9 @@ terraform {
     }
   }
 
-//  provider_meta "google" {
-//    module_name = "blueprints/terraform/terraform-google-iam-config/v1.0.0"
-//  }
+  provider_meta "google" {
+    module_name = "blueprints/terraform/terraform-google-cred-config/v1.0.0"
+  }
 
 }
 
