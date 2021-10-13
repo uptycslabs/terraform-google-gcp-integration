@@ -60,34 +60,17 @@ Login with ADC
 ## 6. Use terraform module steps
 
   * Create a <filename>.tf file, paste below codes and modify as needed.
-  * For inputs parameters please refer ## Inputs section below.
 ```
 module "create-gcp-cred" {
-  source                    = "github.com/uptycslabs/terraform-google-cred-config"
-  organizations_id          = "1234567890"
-  host_folder_name          = "test-folder"
-  host_project_id           = "test-project-q683x6"
-  service_account_name      = "sa-for-test"
-  
-  # (Optional) host project tags
-  host_project_tags         = {"uptycs-integration"="true"}  
-  
-  # Pass patterns to filter projects for integration
-  projects_input_patterns   =  
-                            {
-                             folder_ids_include           = "11111111111,222222222 "
-                             project_ids_include_patterns = "^ops*,*dev*,project-id1,project-id2"
-                             project_ids_exclude          = "test-project-503,test-racer-32561,dev-project-327714"
-                            }
-
-      
-  # AWS account details
-  host_aws_account_id     = "< AWS account id >"
-  host_aws_instance_role  = "< AWS role >"
-
-  # Modify if required
-  gcp_workload_identity = "wip-uptycs"
-  gcp_wip_provider_id   = "aws-id-provider-test"
+  source                    = "github.com/uptycslabs/terraform-google-gcp-integration"
+  organization_id           = "100000000000"   
+  projects_input_patterns   =  {
+                                 folder_ids_include           = "11111111111,222222222"
+                                 project_ids_include_patterns = "^ops*,*dev*,project-id1,project-id2"
+                                 project_ids_exclude          = "test-project-503,test-ops-32561,dev-project-3274"
+                                }
+  host_aws_account_id     = "123456789123"
+  host_aws_instance_role  = "Role_integration"
 }
 
 
@@ -102,8 +85,11 @@ output "integration-projects-list" {
 output "host-project-id" {
   value = module.create-gcp-cred.host-project-id
 }
-
 ```
+## Notes:-
+  * For more input parameters please follow below ##Inputs section and modify if required.
+  * By default projects_input_patterns will filter all ACTIVE projects for integration , Use input patterns for restriction. 
+  * Use folder_ids_include = "\*" to filter all projects present in all folders and project_ids_include_patterns = "\*" to filter all active projects. 
 
 ## 7.Execute Terraform script to get credentials.json and project-list.json
 ```
@@ -114,27 +100,27 @@ $ terraform apply # NOTE: Once terraform successfully applied, it will create "c
 
 ## Inputs
 
-| Name                      | Description                                                                                                        | Type          | Default          |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------- | ---------------- |
-| organizations_id   | The GCP parent organizations id where you wants create resources.                                                  | `string`      | `""`             |
-| host_folder_name          | The folder where host project will be created.                                                                     | `string`      | `""`             |
-| host_project_id           | Pass unique host project ID where planning to create resources.                                                    | `string`      | `""`             |
-| service_account_name      | Pass new service account name.                                                                                     | `string`      | `""`  |
-| host_project_tags         | (Optional) host project tags .                                                                                     | `map(string)` | `{}` |
-| projects_input_patterns   | Filtering projects based on input patterns for integration.                                                        | `map(string)` | `{ folder_ids_include = "" project_ids_include_patterns = "" project_ids_exclude = "" }`             |
-| host_aws_account_id       | The deployer host aws account id.                                                                                  | `number`      | `""`             |
-| host_aws_instance_role    | The attached deployer host aws role name.                                                                          | `string`      | `""`             |
-| gcp_workload_identity     | Workload Identity Pool to allow Uptycs integration via AWS federation                                              | `string`      | `""`             |
-| gcp_wip_provider_id       | Workload Identity Pool provider id allow to add cloud provider                                                     | `string`      | `""`             |
+| Name                      | Description                                                          | Type          | Default          |
+| ------------------------- | -------------------------------------------------------------------- | ------------- | ---------------- |
+| organization_id           | The GCP parent organizations id where resources will be created.     | `string`      | `""`             |
+| host_folder_name          | The folder where host project will be created.                       | `string`      | `"uptycs"`       |
+| host_project_id           | The value of host Project ID .                                       | `string`      | `"uptycs-<auto generated has value>"`|
+| service_account_name      | The service account name which will be created in host project.      | `string`      | `"sa-for-uptycs"`|
+| host_project_tags         | (Optional) host project tags .                                       | `map(string)` | `{"uptycs-integration"="true"}` |
+| projects_input_patterns   | Filtering projects based on input patterns for integration.          | `map(string)` | `{ folder_ids_include = "*" project_ids_include_patterns = "*" project_ids_exclude = "" }`|
+| host_aws_account_id       | The deployer host aws account id.                                    | `string`      | `""`             |
+| host_aws_instance_role    | The attached deployer host aws role name.                            | `string`      | `""`             |
+| gcp_workload_identity     | Workload Identity Pool to allow Uptycs integration via AWS federation| `string`      | `"wip-uptycs"`   |
+| gcp_wip_provider_id       | Workload Identity Pool provider id allow to add cloud provider       | `string`      | `"wip-provider-uptycs"`|
 
 
 ## Outputs
 
-| Name                    | Description                                  |
-| ----------------------- | -------------------------------------------- |
-| regenerate-cred-config-command  | For creating again same cred config json file. |
+| Name                            | Description                                  |
+| ------------------------------- | -------------------------------------------- |
+| regenerate-cred-config-command  | For creating again same cred config json file.|
 | host-project-id                 | It will return host project id.  |
-| integration-projects-list       | It will return projects list based on input patterns for integration . |
+| integration-projects-list       | It will return projects list based on input patterns for integration .|
 
 
 ## Notes
@@ -142,6 +128,6 @@ $ terraform apply # NOTE: Once terraform successfully applied, it will create "c
 1. Workload Identity Pool is soft-deleted and permanently deleted after approximately 30 days.
      - Soft-deleted provider can be restored using `UndeleteWorkloadIdentityPoolProvider`. ID cannot be re-used until the WIP is permanently deleted.
      - After `terraform destroy`, same WIP can't be created again. Modify `gcp_workload_identity` value if required.
-
-2. `credentials.json` is only created once. To re create the file use command returned by `regenerate-cred-config-command` output.
-3. `project-list.json` will be created once apply done , Get json data for UI integration  .
+2. Same host project id can't be used again after terraform destroy .
+3. `credentials.json` is only created once. To re create the file use command returned by `regenerate-cred-config-command` output.
+4. `project-list.json` will be created once apply done , Get json data for UI integration  .

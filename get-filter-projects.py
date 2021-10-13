@@ -74,18 +74,26 @@ def get_projects_details(filter_list):
         sys.exit(e)
 
 
-def filter_projects(fr_pid_list, project_patterns, project_exclusion):
+def filter_projects(folders, project_patterns, project_exclusion):
     try:
         request = service.projects().list()
         response = request.execute()
 
+        fr_pid_list = []
         for project in response.get('projects', []):
             # Getting project ids based on parent folder ids
-            if len(fr_pid_list) > 0:
-                for fr_pid in fr_pid_list:
-                    if project['parent'].get('type') == 'folder' and project['parent'].get('id') == str(fr_pid) and \
-                            project['lifecycleState'] == 'ACTIVE':
-                        f_project_ids.append(project['projectId'])
+            if len(folders) == 1 and folders[0] == '*':
+                if project['parent'].get('type') == 'folder' and project['lifecycleState'] == 'ACTIVE':
+                    f_project_ids.append(project['projectId'])
+            elif len(folders) > 0 and folders[0] != '*':
+                for f in folders:
+                    fr_pid_list.append(f)
+                    fr_pid_list.extend(get_folderids(str(f)))
+                if len(fr_pid_list) > 0:
+                    for fr_pid in fr_pid_list:
+                        if project['parent'].get('type') == 'folder' and project['parent'].get('id') == str(fr_pid) \
+                                and project['lifecycleState'] == 'ACTIVE':
+                            f_project_ids.append(project['projectId'])
 
             # Getting all ACTIVE projectIds
             if project['lifecycleState'] == 'ACTIVE':
@@ -94,7 +102,9 @@ def filter_projects(fr_pid_list, project_patterns, project_exclusion):
             request = service.projects().list_next(previous_request=request, previous_response=response)
 
         # Filtering project Ids as per shared pattern
-        if len(project_patterns) > 0:
+        if len(project_patterns) == 1 and project_patterns[0] == '*':
+            pattern_project_ids.extend(all_project_ids)
+        elif len(project_patterns) > 0 and project_patterns[0] != '*':
             pattern_project_ids.extend(get_pattern_match(project_patterns, all_project_ids))
 
             # Removing projects based on exclusion list
@@ -132,13 +142,7 @@ def main():
     while '' in project_exclusion:
         project_exclusion.remove('')
 
-    fr_pid_list = []
-    if len(folders) > 0:
-        for f in folders:
-            fr_pid_list.append(f)
-            fr_pid_list.extend(get_folderids(str(f)))
-
-    projects = filter_projects(fr_pid_list, project_patterns, project_exclusion)
+    projects = filter_projects(folders, project_patterns, project_exclusion)
     project_details = get_projects_details(projects)
 
     jsondata = {'final_projects_ids': ','.join([str(elem).replace('"', '') for elem in projects]),

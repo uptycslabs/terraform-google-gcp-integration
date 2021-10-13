@@ -25,7 +25,7 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/terraform-google-cred-config/v1.0.0"
+    module_name = "blueprints/terraform/terraform-google-gcp-integration/v1.0.0"
   }
 
 }

@@ -1,26 +1,22 @@
-variable "organizations_id" {
+variable "organization_id" {
   type        = string
   description = "The GCP parent organizations id where planning to create host projects and resources. "
-}
-
-variable "does_host_project_exists" {
-  type        = bool
-  description = "Set true if you want to use existing project as host project."
-  default     = false
 }
 
 variable "host_folder_name" {
   type        = string
   description = "The folder where host project will be created."
+  default     = "uptycs"
 }
 
 variable "host_project_id" {
   type        = string
   description = "The GCP project ID where planning to create resources"
+  default     = ""
 }
 
 variable "host_project_tags" {
-  default     = {}
+  default     = {"uptycs-integration"="true"}
   description = "(Optional) host project tags"
   type        = map(string)
 }
@@ -28,14 +24,15 @@ variable "host_project_tags" {
 variable "service_account_name" {
   type        = string
   description = "The GCP service account name."
+  default     = "sa-for-uptycs"
 }
 
 variable "projects_input_patterns" {
   type = map
   description                    = "Filtering projects based on input patterns for integration. "
   default = {
-    folder_ids_include           = ""
-    project_ids_include_patterns = ""
+    folder_ids_include           = "*"
+    project_ids_include_patterns = "*"
     project_ids_exclude          = ""
   }
 }
@@ -43,11 +40,14 @@ variable "projects_input_patterns" {
 variable "gcp_workload_identity" {
   type        = string
   description = "Workload Identity Pool to allow Uptycs integration via AWS federation."
+  default     = "wip-uptycs"
+
 }
 
 variable "gcp_wip_provider_id" {
   type        = string
   description = "Workload Identity Pool provider ID allow to add cloud provider."
+  default     = "wip-provider-uptycs"
 }
 
 variable "host_aws_account_id" {
