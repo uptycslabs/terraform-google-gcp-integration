@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
-"""Script to filter project ids list using input patterns in Terraform"""
+"""Script to filter project ids list using input patterns in Terraform
+   Run Command :-
+   python3 get-filter-projects.py '{"project_ids_include_patterns":"*ops*,dev*", "folder_ids_include":"12345678,77784655", "project_ids_exclude": "test-ops-100,smart-project-3000"}'
+"""
+
 import sys
 import json
 import re
@@ -80,20 +84,22 @@ def filter_projects(folders, project_patterns, project_exclusion):
         response = request.execute()
 
         fr_pid_list = []
+        if len(folders) > 0 and folders[0] != '*':
+            for f in folders:
+                fr_pid_list.append(f)
+                fr_pid_list.extend(get_folderids(str(f)))
+
         for project in response.get('projects', []):
             # Getting project ids based on parent folder ids
             if len(folders) == 1 and folders[0] == '*':
                 if project['parent'].get('type') == 'folder' and project['lifecycleState'] == 'ACTIVE':
                     f_project_ids.append(project['projectId'])
-            elif len(folders) > 0 and folders[0] != '*':
-                for f in folders:
-                    fr_pid_list.append(f)
-                    fr_pid_list.extend(get_folderids(str(f)))
-                if len(fr_pid_list) > 0:
-                    for fr_pid in fr_pid_list:
-                        if project['parent'].get('type') == 'folder' and project['parent'].get('id') == str(fr_pid) \
-                                and project['lifecycleState'] == 'ACTIVE':
-                            f_project_ids.append(project['projectId'])
+
+            if len(fr_pid_list) > 0:
+                for fr_pid in fr_pid_list:
+                    if project['parent'].get('type') == 'folder' and project['parent'].get('id') == str(fr_pid) \
+                            and project['lifecycleState'] == 'ACTIVE':
+                        f_project_ids.append(project['projectId'])
 
             # Getting all ACTIVE projectIds
             if project['lifecycleState'] == 'ACTIVE':
@@ -117,21 +123,21 @@ def filter_projects(folders, project_patterns, project_exclusion):
         sys.exit(e)
 
 
-def read_in():
-    input_json = sys.stdin.read()
-    try:
-        input_dict = json.loads(input_json)
-        return input_dict
-    except ValueError as e:
-        sys.exit(e)
-
-
 def main():
     try:
-        data = read_in()
-        folders = data.get('folder_id_include').split(',')
-        project_patterns = data.get('project_id_include_pattern').split(',')
-        project_exclusion = data.get('project_id_exclude').split(',')
+        folders = []
+        project_patterns = []
+        project_exclusion = []
+
+        data = json.loads(sys.argv[1])
+
+        if data.get('folder_ids_include'):
+            folders = data.get('folder_ids_include').split(',')
+        if data.get('project_ids_include_patterns'):
+            project_patterns = data.get('project_ids_include_patterns').split(',')
+        if data.get('project_ids_exclude'):
+            project_exclusion = data.get('project_ids_exclude').split(',')
+
     except ValueError as e:
         sys.exit(e)
 
@@ -143,12 +149,14 @@ def main():
         project_exclusion.remove('')
 
     projects = filter_projects(folders, project_patterns, project_exclusion)
-    project_details = get_projects_details(projects)
 
-    jsondata = {'final_projects_ids': ','.join([str(elem).replace('"', '') for elem in projects]),
-                'details': ','.join([str(elem).replace('"', '') for elem in project_details])}
-    sys.stdout.write(json.dumps(jsondata))
+    final_projects_ids = ','.join([str(elem).replace('"', '') for elem in projects])
+    # project_details = get_projects_details(projects)
+    # jsondata = {'final_projects_ids': ','.join([str(elem).replace('"', '') for elem in projects]),
+    #             'details': ','.join([str(elem).replace('"', '') for elem in project_details])}
+    return final_projects_ids
 
 
 if __name__ == '__main__':
-    main()
+    integration_projects = main()
+    print("integration_projects =", '"'+integration_projects+'"')

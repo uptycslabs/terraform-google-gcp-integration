@@ -8,5 +8,5 @@ output "regenerate-cred-config-command" {
 }
 
 output "integration-projects-list" {
-  value = data.external.filters_p.result.final_projects_ids
+  value = var.integration_projects == "" ? toset( data.google_projects.my-org-projects.projects[*].project_id) : toset( split(",",var.integration_projects))
 }

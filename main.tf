@@ -1,11 +1,5 @@
-data "external" "filters_p" {
-  program = ["python3", "${path.module}/get-filter-projects.py"]
-
-  query = {
-    folder_id_include           = var.projects_input_patterns.folder_ids_include
-    project_id_include_pattern  = var.projects_input_patterns.project_ids_include_patterns
-    project_id_exclude          = var.projects_input_patterns.project_ids_exclude
-  }
+data "google_projects" "my-org-projects" {
+  filter = "lifecycleState:ACTIVE"
 }
 
 resource "google_folder" "my_host_folder" {
@@ -55,7 +49,7 @@ resource "google_project_iam_member" "bind_viewer" {
 }
 
 resource "google_project_iam_member" "bind_viewer_SA_to_filter_projects" {
-  for_each   = toset( split(",",data.external.filters_p.result.final_projects_ids))
+  for_each   = var.integration_projects == "" ? toset( data.google_projects.my-org-projects.projects[*].project_id) : toset( split(",",var.integration_projects))
   project    = each.key
   role       = "roles/viewer"
 
@@ -63,7 +57,7 @@ resource "google_project_iam_member" "bind_viewer_SA_to_filter_projects" {
 }
 
 resource "google_project_iam_member" "bind_resourceViewer_SA_to_filter_projects" {
-  for_each   = toset( split(",",data.external.filters_p.result.final_projects_ids))
+  for_each   = var.integration_projects == "" ? toset( data.google_projects.my-org-projects.projects[*].project_id) : toset( split(",",var.integration_projects))
   project    = each.key
   role       = "roles/bigquery.resourceViewer"
 
@@ -71,7 +65,7 @@ resource "google_project_iam_member" "bind_resourceViewer_SA_to_filter_projects"
 }
 
 resource "google_project_iam_member" "bind_pubsub_SA_to_filter_projects" {
-  for_each   = toset( split(",",data.external.filters_p.result.final_projects_ids))
+  for_each   = var.integration_projects == "" ? toset( data.google_projects.my-org-projects.projects[*].project_id) : toset( split(",",var.integration_projects))
   project    = each.key
   role       = "roles/pubsub.subscriber"
 
@@ -79,7 +73,7 @@ resource "google_project_iam_member" "bind_pubsub_SA_to_filter_projects" {
 }
 
 resource "google_project_iam_member" "bind_securityReviewer_SA_to_filter_projects" {
-  for_each   = toset( split(",",data.external.filters_p.result.final_projects_ids))
+  for_each   = var.integration_projects == "" ? toset( data.google_projects.my-org-projects.projects[*].project_id) : toset( split(",",var.integration_projects))
   project    = each.key
   role       = "roles/iam.securityReviewer"
 
@@ -131,8 +125,12 @@ resource "null_resource" "cred_config_json" {
   depends_on = [google_service_account_iam_binding.workload_identity_binding]
 }
 
-resource "local_file" "project_list" {
-  content  = replace("[${data.external.filters_p.result.details}]", "'" , "\"")
-  filename = "project-list.json"
+
+resource "null_resource" "project_list" {
+  provisioner "local-exec" {
+    command     = var.integration_projects == "" ? "gcloud projects list --filter 'lifecycleState: ACTIVE' --format=\"json\" | jq -c > project_list.json" : "for i in $(echo ${var.integration_projects} | sed 's/,/ /g'); do gcloud projects list --filter=\"project_id\":\"$i\" --format=\"json\"|jq -c '.[0]' ; done | tr '\n' ',' | sed -e 's/,$//' | sed -e 's/^/[/g' |sed -e 's/$/]/g' > project_list.json"
+    interpreter = ["/bin/sh", "-c"]
+  }
+  depends_on = [data.google_projects.my-org-projects]
 }
 

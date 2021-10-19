@@ -3,6 +3,12 @@ variable "organization_id" {
   description = "The GCP parent organizations id where planning to create host projects and resources. "
 }
 
+variable "integration_projects" {
+  type        = string
+  description = "Projects need for integration. "
+  default     = ""
+}
+
 variable "host_folder_name" {
   type        = string
   description = "The folder where host project will be created."
@@ -25,16 +31,6 @@ variable "service_account_name" {
   type        = string
   description = "The GCP service account name."
   default     = "sa-for-uptycs"
-}
-
-variable "projects_input_patterns" {
-  type = map
-  description                    = "Filtering projects based on input patterns for integration. "
-  default = {
-    folder_ids_include           = "*"
-    project_ids_include_patterns = "*"
-    project_ids_exclude          = ""
-  }
 }
 
 variable "gcp_workload_identity" {
