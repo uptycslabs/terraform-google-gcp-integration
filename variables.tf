@@ -22,7 +22,7 @@ variable "host_project_id" {
 }
 
 variable "host_project_tags" {
-  default     = {"uptycs-integration"="true"}
+  default     = {}
   description = "(Optional) host project tags"
   type        = map(string)
 }

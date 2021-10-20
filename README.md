@@ -84,8 +84,8 @@ $ terraform apply # NOTE: Once terraform successfully applied, it will create "c
 | host_folder_name          | The folder where host project will be created.                       | `string`      | `"uptycs"`       |
 | host_project_id           | The value of host Project ID .                                       | `string`      | `"uptycs-<auto generated has value>"`|
 | service_account_name      | The service account name which will be created in host project.      | `string`      | `"sa-for-uptycs"`|
-| host_project_tags         | (Optional) host project tags .                                       | `map(string)` | `{"uptycs-integration"="true"}` |
-| integration_projects      | Projects need for integration ,pass project ids with comma-separated string if any. Ex:- "project1,project2"    | `string`         | `""`      |
+| host_project_tags         | (Optional) host project tags .                                       | `map(string)` | `{}`             |
+| integration_projects      | Projects need for integration ,pass project ids with comma-separated string if any. Ex:- "project1,project2"| `string` | `""` |
 | host_aws_account_id       | The deployer host aws account id.                                    | `string`      | `""`             |
 | host_aws_instance_role    | The attached deployer host aws role name.                            | `string`      | `""`             |
 | gcp_workload_identity     | Workload Identity Pool to allow Uptycs integration via AWS federation| `string`      | `"wip-uptycs"`   |
