@@ -16,7 +16,6 @@ resource "google_project" "my_host_project" {
   labels = var.host_project_tags
 }
 
-
 resource "google_service_account" "sa_for_hostproject" {
   project      = google_project.my_host_project.project_id
   account_id   = var.service_account_name
@@ -62,6 +61,7 @@ resource "google_project_iam_member" "bind_resourceViewer_SA_to_filter_projects"
   role       = "roles/bigquery.resourceViewer"
 
   member     = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
+
 }
 
 resource "google_project_iam_member" "bind_pubsub_SA_to_filter_projects" {
@@ -80,12 +80,6 @@ resource "google_project_iam_member" "bind_securityReviewer_SA_to_filter_project
   member     = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
 }
 
-resource "time_sleep" "wait_60_seconds" {
-  depends_on = [google_project.my_host_project]
-
-  create_duration = "60s"
-}
-
 resource "google_iam_workload_identity_pool" "create_wip" {
   provider                  = google-beta
   project                   = google_project.my_host_project.project_id
@@ -93,7 +87,10 @@ resource "google_iam_workload_identity_pool" "create_wip" {
   display_name              = var.gcp_workload_identity
   description               = "Workload Identity Pool to allow Uptycs integration via AWS federation"
   disabled                  = false
-  depends_on = [time_sleep.wait_60_seconds]
+
+  timeouts {
+    create = "10m"
+  }
 }
 
 resource "google_iam_workload_identity_pool_provider" "add_provider" {
@@ -104,7 +101,6 @@ resource "google_iam_workload_identity_pool_provider" "add_provider" {
   aws {
     account_id                       = var.host_aws_account_id
   }
-  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_service_account_iam_binding" "workload_identity_binding" {
@@ -128,9 +124,8 @@ resource "null_resource" "cred_config_json" {
 
 resource "null_resource" "project_list" {
   provisioner "local-exec" {
-    command     = var.integration_projects == "" ? "gcloud projects list --filter 'lifecycleState: ACTIVE' --format=\"json\" | jq -c > project_list.json" : "for i in $(echo ${var.integration_projects} | sed 's/,/ /g'); do gcloud projects list --filter=\"project_id\":\"$i\" --format=\"json\"|jq -c '.[0]' ; done | tr '\n' ',' | sed -e 's/,$//' | sed -e 's/^/[/g' |sed -e 's/$/]/g' > project_list.json"
+    command     = var.integration_projects == "" ? "gcloud projects list --filter 'lifecycleState: ACTIVE AND projectId != ${google_project.my_host_project.project_id}' --format=\"json\" | jq -c > project_list.json" : "eval $(echo ${var.integration_projects} | sed -e 's/^/gcloud projects list --filter=\"project_id:/g' |sed -e 's/,/ OR project_id:/g' | sed -e 's/$/\" --format=\"json\" | jq -c/g') > project_list.json"
     interpreter = ["/bin/sh", "-c"]
   }
   depends_on = [data.google_projects.my-org-projects]
 }
-

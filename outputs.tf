@@ -8,5 +8,9 @@ output "regenerate-cred-config-command" {
 }
 
 output "integration-projects-list" {
-  value = var.integration_projects == "" ? toset( data.google_projects.my-org-projects.projects[*].project_id) : toset( split(",",var.integration_projects))
+  value = var.integration_projects == "" ? join(",",data.google_projects.my-org-projects.projects[*].project_id) : var.integration_projects
+}
+
+output "integration-projects-list-command" {
+  value = var.integration_projects == "" ? "gcloud projects list --filter 'lifecycleState: ACTIVE AND projectId != ${google_project.my_host_project.project_id}' --format=\"json\" | jq -c" : "eval $(echo ${var.integration_projects} | sed -e 's/^/gcloud projects list --filter=\"project_id:/g' |sed -e 's/,/ OR project_id:/g' | sed -e 's/$/\" --format=\"json\" | jq -c/g')"
 }

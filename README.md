@@ -53,6 +53,10 @@ module "create-gcp-cred" {
 }
 
 
+output "host-project-id" {
+  value = module.create-gcp-cred.host-project-id
+}
+
 output "regenerate-cred-config-command" {
   value = module.create-gcp-cred.regenerate-cred-config-command
 }
@@ -61,9 +65,10 @@ output "integration-projects-list" {
   value = module.create-gcp-cred.integration-projects-list
 }
 
-output "host-project-id" {
-  value = module.create-gcp-cred.host-project-id
+output "integration-projects-list-command" {
+  value = module.create-gcp-cred.integration-projects-list-command
 }
+
 ```
 ### Notes:-
   * For more input parameters please follow below ##Inputs section and modify if required.
@@ -99,6 +104,7 @@ $ terraform apply # NOTE: Once terraform successfully applied, it will create "c
 | regenerate-cred-config-command  | For creating again same cred config json file.|
 | host-project-id                 | It will return host project id.  |
 | integration-projects-list       | It will return projects list based on input patterns for integration .|
+| integration-projects-list-command|It will return projects list command to regenerate projects in json format .|
 
 
 ### Notes
