@@ -12,5 +12,5 @@ output "integration-projects-list" {
 }
 
 output "integration-projects-list-command" {
-  value = var.integration_projects == "" ? "gcloud projects list --filter 'lifecycleState: ACTIVE AND projectId != ${google_project.my_host_project.project_id}' --format=\"json\" | jq -c" : "eval $(echo ${var.integration_projects} | sed -e 's/^/gcloud projects list --filter=\"project_id:/g' |sed -e 's/,/ OR project_id:/g' | sed -e 's/$/\" --format=\"json\" | jq -c/g')"
+  value = var.integration_projects == "" ? "gcloud projects list --filter 'lifecycleState: ACTIVE AND projectId != ${google_project.my_host_project.project_id}' --format=\"json\" | jq -c" : "gcloud projects list --filter=${join(",",formatlist("'project_id:%s'" ,replace(var.integration_projects, "," , " OR project_id:")))} --format=\"json\" | jq -c"
 }

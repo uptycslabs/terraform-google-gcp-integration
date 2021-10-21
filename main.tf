@@ -2,6 +2,7 @@ data "google_projects" "my-org-projects" {
   filter = "lifecycleState:ACTIVE"
 }
 
+
 resource "google_folder" "my_host_folder" {
   display_name = var.host_folder_name
   parent       = "organizations/${var.organization_id}"
@@ -124,8 +125,10 @@ resource "null_resource" "cred_config_json" {
 
 resource "null_resource" "project_list" {
   provisioner "local-exec" {
-    command     = var.integration_projects == "" ? "gcloud projects list --filter 'lifecycleState: ACTIVE AND projectId != ${google_project.my_host_project.project_id}' --format=\"json\" | jq -c > project_list.json" : "eval $(echo ${var.integration_projects} | sed -e 's/^/gcloud projects list --filter=\"project_id:/g' |sed -e 's/,/ OR project_id:/g' | sed -e 's/$/\" --format=\"json\" | jq -c/g') > project_list.json"
+    command     = var.integration_projects == "" ? "gcloud projects list --filter 'lifecycleState: ACTIVE ' --format=\"json\" | jq -c > project_list.json" : "gcloud projects list --filter=${join(",",formatlist("'project_id:%s'" ,replace(var.integration_projects, "," , " OR project_id:")))} --format=\"json\" | jq -c > project_list.json"
+
     interpreter = ["/bin/sh", "-c"]
   }
   depends_on = [data.google_projects.my-org-projects]
 }
+
