@@ -67,27 +67,6 @@ def get_pattern_match(patterns, all_pids):
     return r_projects
 
 
-def get_projects_details(filter_list):
-    r_list = []
-    try:
-        request = service.projects().list()
-        response = request.execute()
-
-        for project in response.get('projects', []):
-            # Getting project details and store to a list
-            if filter_list and len(filter_list) > 0:
-                for fl in filter_list:
-                    if project['projectId'] == str(fl):
-                        data = {"projectId": str(project['projectId']), "name": str(project['name'])}
-                        r_list.append(data)
-
-            request = service.projects().list_next(previous_request=request, previous_response=response)
-        return r_list
-    except Exception as e:
-        print("ERROR, Something wrong ,Please verify inputs , gcloud oauth connection OR permission.")
-        sys.exit(e)
-
-
 def filter_projects(folders, project_patterns, project_exclusion):
     try:
         request = service.projects().list()
@@ -167,9 +146,7 @@ python3 get-filter-projects.py '{"project_ids_include_patterns":"*ops*,dev*", "f
 
     projects = filter_projects(folders, project_patterns, project_exclusion)
     final_projects_ids = ','.join([str(elem).replace('"', '') for elem in projects])
-    project_details = get_projects_details(projects)
     print("integration_projects_forTerraform =", '"'+final_projects_ids+'"', "\n")
-    print("integration_projects_list_forUI =", json.dumps(project_details))
 
 
 if __name__ == '__main__':
