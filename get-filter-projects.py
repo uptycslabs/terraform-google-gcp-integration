@@ -8,6 +8,7 @@
 import sys
 import json
 import re
+import argparse
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
@@ -150,6 +151,11 @@ def main():
             project_exclusion = data.get('project_ids_exclude').split(',')
 
     except ValueError as e:
+        print("ERROR ,Not a valid input ,Please verify usage.")
+        print('''
+Run Command :-
+python3 get-filter-projects.py '{"project_ids_include_patterns":"*ops*,dev*", "folder_ids_include":"12345678,77784655", "project_ids_exclude": "test-ops-100,smart-project-3000"}'
+        ''')
         sys.exit(e)
 
     while '' in folders:
