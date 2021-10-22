@@ -8,12 +8,13 @@
 import sys
 import json
 import re
-import subprocess as sp
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
 credentials = GoogleCredentials.get_application_default()
 service = discovery.build('cloudresourcemanager', 'v1', credentials=credentials)
+servicev2 = discovery.build('cloudresourcemanager', 'v2', credentials=credentials)
+
 
 all_project_ids = []
 f_project_ids = []
@@ -23,12 +24,19 @@ pattern_project_ids = []
 def get_subfolder_pid(pf_pid):
     pf_pid_list = []
     try:
-        output = json.loads(
-            sp.getoutput('gcloud resource-manager folders list --folder={} --format="json"'.format(pf_pid)))
-        for i in range(len(output)):
-            pf_pid_list.append(output[i].get('name').split('/')[1])
-        return pf_pid_list
+        p_id = "folders/{}".format(pf_pid)
+        request = servicev2.folders().list(parent=p_id)
+        response = request.execute()
+
+        if bool(response):
+            folder_data = response['folders']
+            for i in range(len(folder_data)):
+                pf_pid_list.append(folder_data[i].get('name').split('/')[1])
+            return pf_pid_list
+        else:
+            return pf_pid_list
     except Exception as e:
+        print("ERROR, Something wrong ,Please verify inputs , gcloud oauth connection OR permission.")
         sys.exit(e)
 
 
@@ -75,6 +83,7 @@ def get_projects_details(filter_list):
             request = service.projects().list_next(previous_request=request, previous_response=response)
         return r_list
     except Exception as e:
+        print("ERROR, Something wrong ,Please verify inputs , gcloud oauth connection OR permission.")
         sys.exit(e)
 
 
@@ -120,6 +129,7 @@ def filter_projects(folders, project_patterns, project_exclusion):
             final_list = list(set(pattern_project_ids + f_project_ids))
         return final_list
     except Exception as e:
+        print("ERROR, Something wrong ,Please verify inputs , gcloud oauth connection OR permission.")
         sys.exit(e)
 
 
@@ -130,6 +140,7 @@ def main():
         project_exclusion = []
 
         data = json.loads(sys.argv[1])
+        print("Passed input parameters :", data, "\n")
 
         if data.get('folder_ids_include'):
             folders = data.get('folder_ids_include').split(',')
@@ -149,14 +160,12 @@ def main():
         project_exclusion.remove('')
 
     projects = filter_projects(folders, project_patterns, project_exclusion)
-
     final_projects_ids = ','.join([str(elem).replace('"', '') for elem in projects])
-    # project_details = get_projects_details(projects)
-    # jsondata = {'final_projects_ids': ','.join([str(elem).replace('"', '') for elem in projects]),
-    #             'details': ','.join([str(elem).replace('"', '') for elem in project_details])}
-    return final_projects_ids
+    project_details = get_projects_details(projects)
+    print("integration_projects_forTerraform =", '"'+final_projects_ids+'"', "\n")
+    print("integration_projects_list_forUI =", json.dumps(project_details))
 
 
 if __name__ == '__main__':
-    integration_projects = main()
-    print("integration_projects =", '"'+integration_projects+'"')
+    main()
+
