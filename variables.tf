@@ -43,7 +43,7 @@ variable "gcp_workload_identity" {
 variable "gcp_wip_provider_id" {
   type        = string
   description = "Workload Identity Pool provider ID allow to add cloud provider."
-  default     = "wip-provider-uptycs"
+  default     = "uptycs-aws-idp"
 }
 
 variable "host_aws_account_id" {
