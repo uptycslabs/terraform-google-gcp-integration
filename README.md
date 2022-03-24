@@ -5,8 +5,8 @@ Customers are expected to have high number of GCP projects. So this module can h
 That allows you to create GCP credential config in Google Cloud Platform projects which will be used to get GCP data from AWS environment.
 
 This module will create below resources:-
- * It creates host folder, host project. , service account, work pool identity & add identity provider to it.
- * It creates service account, work pool identity & identity provider under host project.
+ * It creates host folder, host project.
+ * It further creates service account, work pool identity & identity provider under host project.
  * For each selected project, it will add IAM read permissions (described below) to allow Uptycs' agent to read the resourece inventory
  * It will set these read permissions for the created service account
      * roles/iam.securityReviewer
