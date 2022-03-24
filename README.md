@@ -5,9 +5,10 @@ Customers are expected to have high number of GCP projects. So this module can h
 That allows you to create GCP credential config in Google Cloud Platform projects which will be used to get GCP data from AWS environment.
 
 This module will create below resources:-
- * It creates host folder, host project , service account, work pool identity & add cloud provider to it.
- * It will update IAM permission of each selected project to allow access by the new Service Account.
- * It will attach below policies to service account of host projects and other integration projects.
+ * It creates host folder, host project. , service account, work pool identity & add identity provider to it.
+ * It creates service account, work pool identity & identity provider under host project.
+ * For each selected project, it will add IAM read permissions (described below) to allow Uptycs' agent to read the resourece inventory
+ * It will set these read permissions for the created service account
      * roles/iam.securityReviewer
      * roles/bigquery.resourceViewer
      * roles/pubsub.subscriber
@@ -30,8 +31,6 @@ The following dependencies must be available:
 
 ### 2. Install terraform
 
-This module is meant for use with Terraform version = "~> 3.61.0".
-
 ### 3. Install Google Cloud SDK
 
 ### 4. Authenticate
@@ -47,11 +46,14 @@ Login with ADC
 ```
 module "create-gcp-cred" {
   source                    = "github.com/uptycslabs/terraform-google-gcp-integration"
-  organization_id           = "100000000000"   
-  host_aws_account_id       = "123456789123"
-  host_aws_instance_role    = "Role_integration"
-}
+  organization_id           = "<GCP-ORGANIZATION-ID>"
 
+  # AWS account details
+  # Copy Uptycs's AWS Account ID and Role from Uptycs' UI.
+  # Uptycs' UI: "Cloud"->"GCP"->"Integrations"->"ORGANIZATION INTEGRATION"
+  host_aws_account_id     = "<AWS account id>"
+  host_aws_instance_role  = "<AWS role>"
+}
 
 output "host-project-id" {
   value = module.create-gcp-cred.host-project-id
@@ -85,16 +87,16 @@ $ terraform apply # NOTE: Once terraform successfully applied, it will create "c
 
 | Name                      | Description                                                          | Type          | Default          |
 | ------------------------- | -------------------------------------------------------------------- | ------------- | ---------------- |
-| organization_id           | The GCP parent organizations id where resources will be created.     | `string`      | `""`             |
+| organization_id           | The GCP parent organizations id where resources will be created.     | `string`      | Required            |
 | host_folder_name          | The folder where host project will be created.                       | `string`      | `"uptycs"`       |
-| host_project_id           | The value of host Project ID .                                       | `string`      | `"uptycs-<auto generated has value>"`|
+| host_project_id           | The value of host Project ID .                                       | `string`      | `"uptycs-<auto generated hash>"`|
 | service_account_name      | The service account name which will be created in host project.      | `string`      | `"sa-for-uptycs"`|
 | host_project_tags         | (Optional) host project tags .                                       | `map(string)` | `{}`             |
 | integration_projects      | Projects need for integration ,pass project ids with comma-separated string if any. Ex:- "project1,project2"| `string` | `""` |
-| host_aws_account_id       | The deployer host aws account id.                                    | `string`      | `""`             |
-| host_aws_instance_role    | The attached deployer host aws role name.                            | `string`      | `""`             |
+| host_aws_account_id       | The deployer host aws account id.                                    | `string`      | Required             |
+| host_aws_instance_role    | The attached deployer host aws role name.                            | `string`      | Required             |
 | gcp_workload_identity     | Workload Identity Pool to allow Uptycs integration via AWS federation| `string`      | `"wip-uptycs"`   |
-| gcp_wip_provider_id       | Workload Identity Pool provider id allow to add cloud provider       | `string`      | `"wip-provider-uptycs"`|
+| gcp_wip_provider_id       | Workload Identity Pool provider id allow to add cloud provider       | `string`      | `"uptycs-aws-idp"`|
 
 
 ### Outputs
