@@ -146,7 +146,7 @@ python3 get-filter-projects.py '{"project_ids_include_patterns":"*ops*,dev*", "f
 
     projects = filter_projects(folders, project_patterns, project_exclusion)
     final_projects_ids = ','.join([str(elem).replace('"', '') for elem in projects])
-    print("integration_projects_forTerraform =", '"'+final_projects_ids+'"', "\n")
+    print("integration_projects =", '"'+final_projects_ids+'"', "\n")
 
 
 if __name__ == '__main__':
