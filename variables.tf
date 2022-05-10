@@ -1,24 +1,18 @@
 variable "organization_id" {
   type        = string
-  description = "The GCP parent organizations id where planning to create host projects and resources. "
+  description = "The GCP parent organization ID that is getting integrate."
 }
 
 variable "integration_projects" {
   type        = string
-  description = "Projects need for integration. "
+  description = "Projects need for integration."
   default     = ""
 }
 
-variable "host_folder_name" {
+variable "integration_name" {
   type        = string
-  description = "The folder where host project will be created."
-  default     = "uptycs"
-}
-
-variable "host_project_id" {
-  type        = string
-  description = "The GCP project ID where planning to create resources"
-  default     = ""
+  description = "Unique phrease. Used to name resources created by the plan"
+  default     = "uptycs-int-1"
 }
 
 variable "host_project_tags" {
@@ -31,19 +25,6 @@ variable "service_account_name" {
   type        = string
   description = "The GCP service account name."
   default     = "sa-for-uptycs"
-}
-
-variable "gcp_workload_identity" {
-  type        = string
-  description = "Workload Identity Pool to allow Uptycs integration via AWS federation."
-  default     = "wip-uptycs"
-
-}
-
-variable "gcp_wip_provider_id" {
-  type        = string
-  description = "Workload Identity Pool provider ID allow to add cloud provider."
-  default     = "uptycs-aws-idp"
 }
 
 variable "host_aws_account_id" {

@@ -2,16 +2,14 @@ data "google_projects" "my-org-projects" {
   filter = "lifecycleState:ACTIVE"
 }
 
-
 resource "google_folder" "my_host_folder" {
-  display_name = var.host_folder_name
+  display_name = var.integration_name
   parent       = "organizations/${var.organization_id}"
-
 }
 
 resource "google_project" "my_host_project" {
-  name       = var.host_project_id == "" ? "uptycs-${substr(md5(var.organization_id), -7, -1)}" : var.host_project_id
-  project_id = var.host_project_id == "" ? "uptycs-${substr(md5(var.organization_id), -7, -1)}" : var.host_project_id
+  name       = var.integration_name
+  project_id = var.integration_name
   folder_id  = google_folder.my_host_folder.name
 
   labels = var.host_project_tags
@@ -84,8 +82,8 @@ resource "google_project_iam_member" "bind_securityReviewer_SA_to_filter_project
 resource "google_iam_workload_identity_pool" "create_wip" {
   provider                  = google-beta
   project                   = google_project.my_host_project.project_id
-  workload_identity_pool_id = var.gcp_workload_identity
-  display_name              = var.gcp_workload_identity
+  workload_identity_pool_id = "wip-${var.integration_name}"
+  display_name              = "wip-${var.integration_name}"
   description               = "Workload Identity Pool to allow Uptycs integration via AWS federation"
   disabled                  = false
 
@@ -98,7 +96,7 @@ resource "google_iam_workload_identity_pool_provider" "add_provider" {
   provider                           = google-beta
   project                            = google_project.my_host_project.project_id
   workload_identity_pool_id          = google_iam_workload_identity_pool.create_wip.workload_identity_pool_id
-  workload_identity_pool_provider_id = var.gcp_wip_provider_id
+  workload_identity_pool_provider_id = "idp-${var.integration_name}"
   aws {
     account_id                       = var.host_aws_account_id
   }
@@ -116,7 +114,7 @@ resource "google_service_account_iam_binding" "workload_identity_binding" {
 
 resource "null_resource" "cred_config_json" {
   provisioner "local-exec" {
-    command     = "gcloud iam workload-identity-pools create-cred-config projects/${google_project.my_host_project.number}/locations/global/workloadIdentityPools/${var.gcp_workload_identity}/providers/${var.gcp_wip_provider_id} --service-account=${google_service_account.sa_for_hostproject.email} --output-file=credentials.json --aws"
+    command     = "gcloud iam workload-identity-pools create-cred-config projects/${google_project.my_host_project.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.create_wip.workload_identity_pool_id}/providers/${google_iam_workload_identity_pool_provider.add_provider.workload_identity_pool_provider_id} --service-account=${google_service_account.sa_for_hostproject.email} --output-file=credentials.json --aws"
     interpreter = ["/bin/sh", "-c"]
   }
   depends_on = [google_service_account_iam_binding.workload_identity_binding]
