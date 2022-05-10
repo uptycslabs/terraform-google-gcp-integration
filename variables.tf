@@ -12,7 +12,6 @@ variable "integration_projects" {
 variable "integration_name" {
   type        = string
   description = "Unique phrease. Used to name resources created by the plan"
-  default     = "uptycs-int-1"
 }
 
 variable "host_project_tags" {

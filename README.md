@@ -46,6 +46,7 @@ Login with ADC
 ```
 module "create-gcp-cred" {
   source                    = "github.com/uptycslabs/terraform-google-gcp-integration"
+  integration_name          = "uptycs-int-1"
   organization_id           = "<GCP-ORGANIZATION-ID>"
 
   # AWS account details
@@ -88,15 +89,12 @@ $ terraform apply # NOTE: Once terraform successfully applied, it will create "c
 | Name                      | Description                                                          | Type          | Default          |
 | ------------------------- | -------------------------------------------------------------------- | ------------- | ---------------- |
 | organization_id           | The GCP parent organizations id where resources will be created.     | `string`      | Required            |
-| host_folder_name          | The folder where host project will be created.                       | `string`      | `"uptycs"`       |
-| host_project_id           | The value of host Project ID .                                       | `string`      | `"uptycs-<auto generated hash>"`|
+| integration_name          | Unique phrase. Used to name resources                                | `string`      | `"uptycs-int-1"`    |
 | service_account_name      | The service account name which will be created in host project.      | `string`      | `"sa-for-uptycs"`|
 | host_project_tags         | (Optional) host project tags .                                       | `map(string)` | `{}`             |
 | integration_projects      | Projects need for integration ,pass project ids with comma-separated string if any. Ex:- "project1,project2"| `string` | `""` |
 | host_aws_account_id       | The deployer host aws account id.                                    | `string`      | Required             |
 | host_aws_instance_role    | The attached deployer host aws role name.                            | `string`      | Required             |
-| gcp_workload_identity     | Workload Identity Pool to allow Uptycs integration via AWS federation| `string`      | `"wip-uptycs"`   |
-| gcp_wip_provider_id       | Workload Identity Pool provider id allow to add cloud provider       | `string`      | `"uptycs-aws-idp"`|
 
 
 ### Outputs
@@ -113,10 +111,11 @@ $ terraform apply # NOTE: Once terraform successfully applied, it will create "c
 
 1. Workload Identity Pool is soft-deleted and permanently deleted after approximately 30 days.
      - Soft-deleted provider can be restored using `UndeleteWorkloadIdentityPoolProvider`. ID cannot be re-used until the WIP is permanently deleted.
-     - After `terraform destroy`, same WIP can't be created again. Modify `gcp_workload_identity` value if required.
-2. Same host project id can't be used again after terraform destroy .
-3. `credentials.json` is only created once. To re create the file use command returned by `regenerate-cred-config-command` output.
-4. `project-list.json` will be created once apply done , Get json data for UI integration  .
+     - After `terraform destroy`, same WIP can't be created again.
+2. Same host project id can't be used again after terraform destroy.
+3. Change `integration_name` to change names of the resources host folder, project, wip and idp.
+4. `credentials.json` is only created once. To re create the file use command returned by `regenerate-cred-config-command` output.
+5. `project-list.json` will be created once apply done , Get json data for UI integration  .
 
 
 ## (Optional) Requirements and Use of python script to filter integration projects.
