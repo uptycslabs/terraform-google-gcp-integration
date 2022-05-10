@@ -17,6 +17,126 @@ resource "google_project" "my_host_project" {
   labels = var.host_project_tags
 }
 
+resource "google_project_service" "bigquery_service" {
+   project = google_project.my_host_project.project_id
+   service = "bigquery.googleapis.com"
+}
+
+resource "google_project_service" "bigquerymigration_service" {
+   project = google_project.my_host_project.project_id
+   service = "bigquerymigration.googleapis.com"
+}
+
+resource "google_project_service" "bigquerystorage_service" {
+   project = google_project.my_host_project.project_id
+   service = "bigquerystorage.googleapis.com"
+}
+
+resource "google_project_service" "cloudapis_service" {
+   project = google_project.my_host_project.project_id
+   service = "cloudapis.googleapis.com"
+}
+
+resource "google_project_service" "clouddebugger_service" {
+   project = google_project.my_host_project.project_id
+   service = "clouddebugger.googleapis.com"
+}
+
+resource "google_project_service" "cloudfunctions_service" {
+   project = google_project.my_host_project.project_id
+   service = "cloudfunctions.googleapis.com"
+}
+
+resource "google_project_service" "cloudkms_service" {
+   project = google_project.my_host_project.project_id
+   service = "cloudkms.googleapis.com"
+}
+
+resource "google_project_service" "cloudresourcemanager_service" {
+   project = google_project.my_host_project.project_id
+   service = "cloudresourcemanager.googleapis.com"
+}
+
+resource "google_project_service" "cloudtrace_service" {
+   project = google_project.my_host_project.project_id
+   service = "cloudtrace.googleapis.com"
+}
+
+resource "google_project_service" "datastore_service" {
+   project = google_project.my_host_project.project_id
+   service = "datastore.googleapis.com"
+}
+
+resource "google_project_service" "iam_service" {
+   project = google_project.my_host_project.project_id
+   service = "iam.googleapis.com"
+}
+
+resource "google_project_service" "iamcredentials_service" {
+   project = google_project.my_host_project.project_id
+   service = "iamcredentials.googleapis.com"
+}
+
+resource "google_project_service" "logging_service" {
+   project = google_project.my_host_project.project_id
+   service = "logging.googleapis.com"
+}
+
+resource "google_project_service" "monitoring_service" {
+   project = google_project.my_host_project.project_id
+   service = "monitoring.googleapis.com"
+}
+
+resource "google_project_service" "pubsub_service" {
+   project = google_project.my_host_project.project_id
+   service = "pubsub.googleapis.com"
+}
+
+resource "google_project_service" "servicemanagement_service" {
+   project = google_project.my_host_project.project_id
+   service = "servicemanagement.googleapis.com"
+}
+
+resource "google_project_service" "servicenetworking_service" {
+   project = google_project.my_host_project.project_id
+   service = "servicenetworking.googleapis.com"
+}
+
+resource "google_project_service" "serviceusage_service" {
+   project = google_project.my_host_project.project_id
+   service = "serviceusage.googleapis.com"
+}
+
+resource "google_project_service" "sourcerepo_service" {
+   project = google_project.my_host_project.project_id
+   service = "sourcerepo.googleapis.com"
+}
+
+resource "google_project_service" "sql_component_service" {
+   project = google_project.my_host_project.project_id
+   service = "sql-component.googleapis.com"
+}
+
+resource "google_project_service" "sqladmin_service" {
+   project = google_project.my_host_project.project_id
+   service = "sqladmin.googleapis.com"
+}
+
+resource "google_project_service" "storage_api_service" {
+   project = google_project.my_host_project.project_id
+   service = "storage-api.googleapis.com"
+}
+
+resource "google_project_service" "storage_component_service" {
+   project = google_project.my_host_project.project_id
+   service = "storage-component.googleapis.com"
+}
+
+resource "google_project_service" "storage_service" {
+   project = google_project.my_host_project.project_id
+   service = "storage.googleapis.com"
+}
+
 resource "google_service_account" "sa_for_hostproject" {
   project      = google_project.my_host_project.project_id
   account_id   = var.service_account_name
