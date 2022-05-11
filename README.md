@@ -7,7 +7,7 @@ That allows you to create GCP credential config in Google Cloud Platform project
 This module will create below resources:-
  * It creates host folder, host project.
  * It further creates service account, work pool identity & identity provider under host project.
- * For each selected project, it will add IAM read permissions (described below) to allow Uptycs' agent to read the resourece inventory
+ * For each selected project, it will add IAM read permissions (described below) to allow Uptycs' agent to read the resource inventory
  * It will set these read permissions for the created service account
      * roles/iam.securityReviewer
      * roles/bigquery.resourceViewer
@@ -75,7 +75,9 @@ output "integration-projects-list-command" {
 ```
 ### Notes:-
   * For more input parameters please follow below ##Inputs section and modify if required.
-  * By default integration_projects will filter all ACTIVE projects for integration , pass project ids with comma-separated for restriction or use python script for more filters. 
+  * By default, with an empty `integration_projects`, ALL active projects are integrated.
+  * It is recommended to pass comma-separated list of project ids so specific projects are integrated.
+  * Python script is available (check repo) generate project list with the help of advanced filters. 
 
 ### 6.Execute Terraform script to get credentials.json and project-list.json
 ```
