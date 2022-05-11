@@ -49,6 +49,10 @@ module "create-gcp-cred" {
   integration_name          = "uptycs-int-1"
   organization_id           = "<GCP-ORGANIZATION-ID>"
 
+  # Set "integration_projects" to list of project IDs to integrate with uptycs
+  # Use provided python script to generate projects list with advanced filter options
+  integration_projects      = ""
+
   # AWS account details
   # Copy Uptycs's AWS Account ID and Role from Uptycs' UI.
   # Uptycs' UI: "Cloud"->"GCP"->"Integrations"->"ORGANIZATION INTEGRATION"
@@ -82,8 +86,11 @@ output "integration-projects-list-command" {
 ### 6.Execute Terraform script to get credentials.json and project-list.json
 ```
 $ terraform init
-$ terraform plan  # Warning :- Please verify carefully before apply .
-$ terraform apply # NOTE: Once terraform successfully applied, it will create "credentials.json" and "project-list.json" files.
+$ terraform plan  # Warning :- Please verify before applying.
+$ terraform apply
+# NOTE 1: Once terraform successfully applied, it will create "credentials.json" and "project-list.json" files
+# NOTE 2: retry 'apply' if it fails with following error
+#   - "Error creating WorkloadIdentityPool: googleapi: Error 403: Permission"
 ```
 
 ### Inputs
