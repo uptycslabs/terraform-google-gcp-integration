@@ -1,17 +1,17 @@
 variable "organization_id" {
   type        = string
-  description = "The GCP parent organization ID that is getting integrate."
+  description = "The GCP parent organization ID that is getting integrated"
 }
 
 variable "integration_projects" {
   type        = string
-  description = "Projects need for integration."
+  description = "List of projects to be integrated"
   default     = ""
 }
 
 variable "integration_name" {
   type        = string
-  description = "Unique phrease. Used to name resources created by the plan"
+  description = "Unique phrase. Used to name resources created by the plan"
 }
 
 variable "host_project_tags" {
