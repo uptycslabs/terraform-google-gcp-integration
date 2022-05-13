@@ -18,121 +18,169 @@ resource "google_project" "my_host_project" {
 resource "google_project_service" "bigquery_service" {
    project = google_project.my_host_project.project_id
    service = "bigquery.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "bigquerymigration_service" {
    project = google_project.my_host_project.project_id
    service = "bigquerymigration.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "bigquerystorage_service" {
    project = google_project.my_host_project.project_id
    service = "bigquerystorage.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "cloudapis_service" {
    project = google_project.my_host_project.project_id
    service = "cloudapis.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "clouddebugger_service" {
    project = google_project.my_host_project.project_id
    service = "clouddebugger.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "cloudfunctions_service" {
    project = google_project.my_host_project.project_id
    service = "cloudfunctions.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "cloudkms_service" {
    project = google_project.my_host_project.project_id
    service = "cloudkms.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "cloudresourcemanager_service" {
    project = google_project.my_host_project.project_id
    service = "cloudresourcemanager.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "cloudtrace_service" {
    project = google_project.my_host_project.project_id
    service = "cloudtrace.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "datastore_service" {
    project = google_project.my_host_project.project_id
    service = "datastore.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "iam_service" {
    project = google_project.my_host_project.project_id
    service = "iam.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "iamcredentials_service" {
    project = google_project.my_host_project.project_id
    service = "iamcredentials.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "logging_service" {
    project = google_project.my_host_project.project_id
    service = "logging.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "monitoring_service" {
    project = google_project.my_host_project.project_id
    service = "monitoring.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "pubsub_service" {
    project = google_project.my_host_project.project_id
    service = "pubsub.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "servicemanagement_service" {
    project = google_project.my_host_project.project_id
    service = "servicemanagement.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "servicenetworking_service" {
    project = google_project.my_host_project.project_id
    service = "servicenetworking.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "serviceusage_service" {
    project = google_project.my_host_project.project_id
    service = "serviceusage.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "sourcerepo_service" {
    project = google_project.my_host_project.project_id
    service = "sourcerepo.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "sql_component_service" {
    project = google_project.my_host_project.project_id
    service = "sql-component.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "sqladmin_service" {
    project = google_project.my_host_project.project_id
    service = "sqladmin.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "storage_api_service" {
    project = google_project.my_host_project.project_id
    service = "storage-api.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "storage_component_service" {
    project = google_project.my_host_project.project_id
    service = "storage-component.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_project_service" "storage_service" {
    project = google_project.my_host_project.project_id
    service = "storage.googleapis.com"
+
+   disable_dependent_services = true
 }
 
 resource "google_service_account" "sa_for_hostproject" {
