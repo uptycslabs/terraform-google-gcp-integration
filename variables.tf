@@ -3,21 +3,14 @@ variable "organization_id" {
   description = "The GCP parent organization ID that is getting integrated"
 }
 
-variable "integration_projects" {
+variable "host_project_id" {
   type        = string
-  description = "List of projects to be integrated"
-  default     = ""
+  description = "Project ID to host resources created as part of integration."
 }
 
 variable "integration_name" {
   type        = string
-  description = "Unique phrase. Used to name resources created by the plan"
-}
-
-variable "host_project_tags" {
-  default     = {}
-  description = "(Optional) host project tags"
-  type        = map(string)
+  description = "Unique tag. Used to name resources created by the plan"
 }
 
 variable "service_account_name" {
