@@ -1,153 +1,98 @@
-# Terraform GCP IAM module
+# Terraform GCP module - Organization Integration for Uptycs 
 
 ## Overview
-Customers are expected to have high number of GCP projects. So this module can handle integration of a group of projects at a time. 
-That allows you to create GCP credential config in Google Cloud Platform projects which will be used to get GCP data from AWS environment.
+This module will provision the required GCP resources inorder to integrate GCP organization with Uptycs.
 
-This module will create below resources:-
- * It creates host folder, host project.
- * It further creates service account, work pool identity & identity provider under host project.
- * For each selected project, it will add IAM read permissions (described below) to allow Uptycs' agent to read the resource inventory
- * It will set these read permissions for the created service account
+This will module will integrate multiple child projects under the organization.
+
+This module will create following resources:
+ * Service Account, Workload Identity Pool & Identity provider under host-project
+ * For each project selected, it will add IAM read permissions (described below) so Uptycs can collect telemetry
+ * Read permissions for the created Service Account
      * roles/iam.securityReviewer
      * roles/bigquery.resourceViewer
      * roles/pubsub.subscriber
      * roles/viewer
 
 ## Requirements
-
-These sections describe requirements for using this module.
-The following dependencies must be available:
-
 ### 1. User & IAM
-
-* The user account should have access to the GCP project for perform operation.
-* Service account or user credentials with the following privileged roles must be used to provision the resources of this module:
-  
+* Following privileges are required inorder to provision the resources
   * To manage multiple projects & folders User/Principal need to provision below roles in organization label.
     * projectCreator
     * Folder Admin
     * IAM Workload Identity Pool Admin
 
-### 2. Install terraform
+### 2. Terraform
+`terraform` version >= 1.2.5
 
-### 3. Install Google Cloud SDK
+### 3. gcloud CLI
+`gcloud` is required to get authenticated and to generate credentials file
 
-### 4. Authenticate
-
+### 4. Authenticate 
 ```
 Login with ADC
   - "gcloud auth application-default login"
 ```
+## Terraform script
 
-### 5. Use terraform module steps
-
-  * Create a `filename.tf` file, paste below codes and modify as needed.
+### 1. Prepare .tf file
+  * Create a `main.tf` file in a new folder. Paste following configuration and modify as needed.
 ```
 module "create-gcp-cred" {
   source                    = "github.com/uptycslabs/terraform-google-gcp-integration"
-  integration_name          = "uptycs-int-1"
+  integration_name          = "uptycs-int-123"
   organization_id           = "<GCP-ORGANIZATION-ID>"
 
-  # Set "integration_projects" to list of project IDs to integrate with uptycs
-  # Use provided python script to generate projects list with advanced filter options
-  integration_projects      = ""
+  # Select an existing project from your organization to host resources created by this configuration
+  host_project_id = "<Host-Project-ID>"
 
   # AWS account details
   # Copy Uptycs's AWS Account ID and Role from Uptycs' UI.
   # Uptycs' UI: "Cloud"->"GCP"->"Integrations"->"ORGANIZATION INTEGRATION"
   host_aws_account_id     = "<AWS account id>"
-  host_aws_instance_role  = "<AWS role>"
+  host_aws_instance_roles  = ["<Role1>", "<Role2>"]
 }
 
 output "host-project-id" {
   value = module.create-gcp-cred.host-project-id
 }
 
-output "regenerate-cred-config-command" {
-  value = module.create-gcp-cred.regenerate-cred-config-command
+output "integration-name" {
+  value = module.create-gcp-cred.integration-name
 }
 
-output "integration-projects-list" {
-  value = module.create-gcp-cred.integration-projects-list
-}
-
-output "integration-projects-list-command" {
-  value = module.create-gcp-cred.integration-projects-list-command
+output "credential-file-gen-command" {
+  value = module.create-gcp-cred.credential-file-gen-command
 }
 
 ```
-### Notes:-
-  * For more input parameters please follow below ##Inputs section and modify if required.
-  * By default, with an empty `integration_projects`, ALL active projects are integrated.
-  * It is recommended to pass comma-separated list of project ids so specific projects are integrated.
-  * Python script is available (check repo) generate project list with the help of advanced filters. 
+### 2. Init, Plan and Apply
 
-### 6.Execute Terraform script to get credentials.json and project-list.json
-```
-$ terraform init
-$ terraform plan  # Warning :- Please verify before applying.
-$ terraform apply
-# NOTE 1: Once terraform successfully applied, it will create "credentials.json" and "project-list.json" files
-# NOTE 2: retry 'apply' if it fails with following error
-#   - "Error creating WorkloadIdentityPool: googleapi: Error 403: Permission"
-```
-
-### Inputs
-
+#### Inputs
 | Name                      | Description                                                          | Type          | Default          |
 | ------------------------- | -------------------------------------------------------------------- | ------------- | ---------------- |
 | organization_id           | The GCP parent organizations id where resources will be created.     | `string`      | Required            |
 | integration_name          | Unique phrase. Used to name resources                                | `string`      | `"uptycs-int-1"`    |
-| service_account_name      | The service account name which will be created in host project.      | `string`      | `"sa-for-uptycs"`|
-| host_project_tags         | (Optional) host project tags .                                       | `map(string)` | `{}`             |
-| integration_projects      | Projects need for integration ,pass project ids with comma-separated string if any. Ex:- "project1,project2"| `string` | `""` |
-| host_aws_account_id       | The deployer host aws account id.                                    | `string`      | Required             |
-| host_aws_instance_role    | The attached deployer host aws role name.                            | `string`      | Required             |
+| host_aws_account_id       | AWS account id of Uptycs - for federated identity                    | `string`      | Required             |
+| host_aws_instance_roles   | AWS role names of Uptycs - for identity binding                      | `list(string)`        | Required             | 
 
-
-### Outputs
-
+#### Outputs
 | Name                            | Description                                  |
 | ------------------------------- | -------------------------------------------- |
-| regenerate-cred-config-command  | For creating again same cred config json file.|
-| host-project-id                 | It will return host project id.  |
-| integration-projects-list       | It will return projects list based on input patterns for integration .|
-| integration-projects-list-command|It will return projects list command to regenerate projects in json format .|
+| credential-file-gen-command     | Command to generate credentials JSON file.   |
+| host-project-id                 | Host Project ID.                             |
 
+```
+$ terraform init
+$ terraform plan  # Please verify before applying
+$ terraform apply
+# Once terraform successfully applied, it will create "credentials.json" file
+```
 
 ### Notes
-
-1. Workload Identity Pool is soft-deleted and permanently deleted after approximately 30 days.
-     - Soft-deleted provider can be restored using `UndeleteWorkloadIdentityPoolProvider`. ID cannot be re-used until the WIP is permanently deleted.
-     - After `terraform destroy`, same WIP can't be created again.
-2. Same host project id can't be used again after terraform destroy.
-3. Change `integration_name` to change names of the resources host folder, project, wip and idp.
-4. `credentials.json` is only created once. To re create the file use command returned by `regenerate-cred-config-command` output.
-5. `project-list.json` will be created once apply done , Get json data for UI integration  .
-
-
-## (Optional) Requirements and Use of python script to filter integration projects.
-
-### 1. Install Google Cloud SDK
-### 2. Install python3, google-api-python-client & oauth2client
-```
-pip3 install --upgrade google-api-python-client
-pip3 install --upgrade oauth2client
-```
-
-* Notes :- If error comes to install google-api-python-client and oauth2client then go for install these libraries in a virtualenv using pip3.
-* Installation in Mac/Linux
-```
-pip3 install virtualenv
-virtualenv <your-env>
-source <your-env>/bin/activate
-<your-env>/bin/pip3 install --upgrade google-api-python-client
-<your-env>/bin/pip3 install --upgrade oauth2client
-```
-
-* Run python script to get projects list 
-```
-    python3 get-filter-projects.py '{"project_ids_include_patterns":"*ops*,dev*", "folder_ids_include":"12345678,77784655", "project_ids_exclude": "test-ops-100,smart-project-3000"}'
-```
-* Notes : `"project_ids_include_patterns" : "*" and "folder_ids_include": "*"  these can be * in case of all projects and folders respectively.`
+1. Change `integration_name` to change names of the resources host folder, project, wip and idp.
+2. Notes on `terraform destroy`
+     - Soft-deleted provider can be restored using `UndeleteWorkloadIdentityPoolProvider`.
+     - ID cannot be re-used until the WIP is permanently deleted.
+     - Same WIP can't be created again.
+4. Run the command returned by `credential-file-gen-command` to re-generate `credentials.json`

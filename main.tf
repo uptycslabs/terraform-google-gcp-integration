@@ -8,25 +8,25 @@ data "google_project" "my_host_project" {
 
 locals {
   projects_with_tag = toset([for each in data.google_projects.my-org-projects.projects : each.project_id if contains(keys(each.labels), "uptycs-integration")])
-  projects_to_integrate = setunion(local.projects_with_tag, [var.host_project_id])
-  services_names = []
-  /*services_names = [
+  all_project_ids = toset([for each in data.google_projects.my-org-projects.projects : each.project_id])
+  projects_to_integrate = length(local.projects_with_tag) != 0 ? setunion(local.projects_with_tag, [var.host_project_id]) : local.all_project_ids
+  /*service_names = [
                      "bigquery", "bigquerymigration", "bigquerystorage", "cloudapis",
                      "clouddebugger", "cloudfunctions", "cloudkms", "cloudresourcemanager",
                      "cloudtrace", "datastore", "iam", "iamcredentials", "logging", "monitoring",
                      "pubsub", "servicemanagement", "servicenetworking", "serviceusage", "sourcerepo",
                      "sql-component", "sqladmin", "storage-api", "storage-component", "storage"
                    ]*/
-  services_to_enable = toset([for each in local.services_names : "${each}.googleapis.com"])
+  //services_to_enable = toset([for each in local.service_names : "${each}.googleapis.com"])
 }
 
-resource "google_project_service" "services_enable" {
-   for_each = local.services_to_enable
-   project  = data.google_project.my_host_project.project_id
-   service  = each.key
-
-   disable_dependent_services = true
-}
+//resource "google_project_service" "services_enable" {
+//   for_each = local.services_to_enable
+//   project  = data.google_project.my_host_project.project_id
+//   service  = each.key
+//
+//   disable_dependent_services = true
+//}
 
 resource "google_service_account" "sa_for_hostproject" {
   project      = data.google_project.my_host_project.project_id
@@ -102,10 +102,7 @@ resource "google_service_account_iam_binding" "workload_identity_binding" {
   service_account_id = google_service_account.sa_for_hostproject.name
 
   role               = "roles/iam.workloadIdentityUser"
-  members = [
-    "principalSet://iam.googleapis.com/projects/${data.google_project.my_host_project.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.create_wip.workload_identity_pool_id}/attribute.aws_role/arn:aws:sts::${var.host_aws_account_id}:assumed-role/${var.host_aws_instance_role}",
-    "principalSet://iam.googleapis.com/projects/${data.google_project.my_host_project.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.create_wip.workload_identity_pool_id}/attribute.aws_role/arn:aws:sts::${var.host_aws_account_id}:assumed-role/Role_PNode"
-  ]
+  members = [for each in var.host_aws_instance_roles : format("principalSet://iam.googleapis.com/projects/%s/locations/global/workloadIdentityPools/%s/attribute.aws_role/arn:aws:sts::%s:assumed-role/%s", data.google_project.my_host_project.number, google_iam_workload_identity_pool.create_wip.workload_identity_pool_id, var.host_aws_account_id, each)]
   depends_on = [google_iam_workload_identity_pool.create_wip]
 }
 
@@ -116,4 +113,3 @@ resource "null_resource" "cred_config_json" {
   }
   depends_on = [google_service_account_iam_binding.workload_identity_binding]
 }
-
