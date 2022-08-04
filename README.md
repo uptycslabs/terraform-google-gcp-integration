@@ -40,8 +40,9 @@ Login with ADC
 ```
 module "create-gcp-cred" {
   source                    = "github.com/uptycslabs/terraform-google-gcp-integration"
-  integration_name          = "uptycs-int-123"
   organization_id           = "<GCP-ORGANIZATION-ID>"
+  integration_name          = "uptycs-int-20220101"
+  service_account_name      = "sa-for-uptycs"
 
   # Select an existing project from your organization to host resources created by this configuration
   host_project_id = "<Host-Project-ID>"
@@ -71,10 +72,12 @@ output "credential-file-gen-command" {
 #### Inputs
 | Name                      | Description                                                          | Type          | Default          |
 | ------------------------- | -------------------------------------------------------------------- | ------------- | ---------------- |
-| organization_id           | The GCP parent organizations id where resources will be created.     | `string`      | Required            |
-| integration_name          | Unique phrase. Used to name resources                                | `string`      | `"uptycs-int-1"`    |
-| host_aws_account_id       | AWS account id of Uptycs - for federated identity                    | `string`      | Required             |
-| host_aws_instance_roles   | AWS role names of Uptycs - for identity binding                      | `list(string)`        | Required             | 
+| organization_id           | The GCP parent organizations id where resources will be created.     | `string`      | Required         |
+| integration_name          | Unique phrase. Used to name resources                                | `string`      | `"uptycs-int-20220101"`|
+| service_account_name      | The service account name which will be created in host project.      | `string`      | `"sa-for-uptycs"`|
+| host_project_id           | GCP Project ID that Uptycs should create required resources under    | `string`      | Required         |
+| host_aws_account_id       | AWS account id of Uptycs - for federated identity                    | `string`      | Required         |
+| host_aws_instance_roles   | AWS role names of Uptycs - for identity binding                      | `list(string)`| Required         |
 
 #### Outputs
 | Name                            | Description                                  |

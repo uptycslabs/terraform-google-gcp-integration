@@ -16,7 +16,6 @@ variable "integration_name" {
 variable "service_account_name" {
   type = string
   description = "The GCP service account name."
-  default = "sa-for-uptycs"
 }
 
 variable "host_aws_account_id" {
