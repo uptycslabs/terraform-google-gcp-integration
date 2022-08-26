@@ -16,10 +16,8 @@ This module will create following resources:
 
 ## Requirements
 ### 1. User & IAM
-* Following privileges are required inorder to provision the resources
-  * To manage multiple projects & folders User/Principal need to provision below roles in organization label.
-    * projectCreator
-    * Folder Admin
+* You need to have the following privileges to apply the configuration
+    * Organization Administrator
     * IAM Workload Identity Pool Admin
 
 ### 2. Terraform
