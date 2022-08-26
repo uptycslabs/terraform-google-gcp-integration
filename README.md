@@ -18,7 +18,8 @@ This module will create following resources:
 ### 1. User & IAM
 * You need to have the following privileges to apply the configuration
     * Organization Administrator
-    * IAM Workload Identity Pool Admin
+    * IAM Workload Identity Pool Admin (at Org level)
+    * Service Account Admin (at Host Project level)
 
 ### 2. Terraform
 `terraform` version >= 1.2.5
