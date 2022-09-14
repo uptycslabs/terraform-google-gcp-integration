@@ -36,22 +36,54 @@ resource "google_service_account" "sa_for_hostproject" {
 }
 
 resource "google_project_iam_member" "bind_viewer_SA_to_filter_projects" {
-  for_each   = local.projects_to_integrate
+  for_each   = var.set_org_level_permissions == true ? [] : local.projects_to_integrate
   project    = each.key
   role       = "roles/viewer"
 
   member     = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
 }
 
-resource "google_organization_iam_member" "bind_projects_browser_SA_to_filter_projects" {
+resource "google_organization_iam_member" "bind_projects_browser_SA_to_Organization" {
   org_id    = var.organization_id
   role       = "roles/browser"
 
   member     = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
 }
 
+resource "google_organization_iam_member" "bind_Viewer_SA_to_Organization" {
+  count = var.set_org_level_permissions == true ? 1 : 0
+  org_id    = var.organization_id
+  role       = "roles/viewer"
+
+  member     = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
+}
+
+resource "google_organization_iam_member" "bind_resourceViewer_SA_to_Organization" {
+  count = var.set_org_level_permissions == true ? 1 : 0
+  org_id    = var.organization_id
+  role       = "roles/bigquery.resourceViewer"
+
+  member     = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
+}
+
+resource "google_organization_iam_member" "bind_pubsub_SA_to_Organization" {
+  count = var.set_org_level_permissions == true ? 1 : 0
+  org_id    = var.organization_id
+  role       = "roles/pubsub.subscriber"
+
+  member     = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
+}
+
+resource "google_organization_iam_member" "bind_securityReviewer_SA_to_Organization" {
+  count = var.set_org_level_permissions == true ? 1 : 0
+  org_id    = var.organization_id
+  role       = "roles/iam.securityReviewer"
+
+  member     = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
+}
+
 resource "google_project_iam_member" "bind_resourceViewer_SA_to_filter_projects" {
-  for_each   = local.projects_to_integrate
+  for_each   = var.set_org_level_permissions == true ? [] : local.projects_to_integrate
   project    = each.key
   role       = "roles/bigquery.resourceViewer"
 
@@ -60,7 +92,7 @@ resource "google_project_iam_member" "bind_resourceViewer_SA_to_filter_projects"
 }
 
 resource "google_project_iam_member" "bind_pubsub_SA_to_filter_projects" {
-  for_each   = local.projects_to_integrate
+  for_each   = var.set_org_level_permissions == true ? [] : local.projects_to_integrate
   project    = each.key
   role       = "roles/pubsub.subscriber"
 
@@ -68,7 +100,7 @@ resource "google_project_iam_member" "bind_pubsub_SA_to_filter_projects" {
 }
 
 resource "google_project_iam_member" "bind_securityReviewer_SA_to_filter_projects" {
-  for_each   = local.projects_to_integrate
+  for_each   = var.set_org_level_permissions == true ? [] : local.projects_to_integrate
   project    = each.key
   role       = "roles/iam.securityReviewer"
 

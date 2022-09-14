@@ -13,6 +13,11 @@ variable "integration_name" {
   description = "Unique tag. Used to name resources created by the plan"
 }
 
+variable "set_org_level_permissions" {
+  type = bool
+  description = "Used to set permissions at org level or project level"
+}
+
 variable "service_account_name" {
   type = string
   description = "The GCP service account name."
