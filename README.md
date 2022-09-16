@@ -24,7 +24,7 @@ This module will create following resources:
 * You need to have the following privileges to apply the configuration
   * Organization Administrator
   * IAM Workload Identity Pool Admin (at Org level)
-  * Service Account Admin (at Host Project level)
+  * Service Account Admin (at Org level)
 
 ### 2. Terraform
 
@@ -65,7 +65,7 @@ module "create-gcp-cred" {
   # Copy Uptycs's AWS Account ID and Role from Uptycs' UI.
   # Uptycs' UI: "Cloud"->"GCP"->"Integrations"->"ORGANIZATION INTEGRATION"
   host_aws_account_id     = "<AWS account id>"
-  host_aws_instance_roles  = ["<Role1>", "<Role2>", "<Role3>"]
+  host_aws_instance_roles  = ["Role_Allinone", "Role_PNode", "Role_Cloudquery"]
 }
 
 output "host-project-id" {
@@ -99,7 +99,7 @@ If you set the flag `set_org_level_permissions` to true, then the permissions at
 | host_project_id           | GCP Project ID that Uptycs should create required resources under     | `string`       | Required                |
 | host_aws_account_id       | AWS account id of Uptycs - for federated identity                     | `string`       | Required                |
 | host_aws_instance_roles   | AWS role names of Uptycs - for identity binding                       | `list(string)` | Required                |
-| set_org_level_permissions | The flag to choose permissions at organization level or project level | `bool`         | Required                |
+| set_org_level_permissions | The flag to choose permissions at organization level or project level | `bool`         | true                |
 
 #### Outputs
 
