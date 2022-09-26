@@ -1,41 +1,27 @@
-data "google_projects" "my-org-projects" {
-  filter = "lifecycleState:ACTIVE"
-}
 
 data "google_project" "my_host_project" {
   project_id = var.host_project_id
 }
 
-data "google_folders" "my-org-folders" {
-  parent_id = "organizations/${var.organization_id}"
+module "folder_id_reader" {
+  source = "./modules/read_folder_id"
+  organization_id = var.organization_id
+  parent_folder_name = "system-gsuite"
+  folder_name = "apps-script"
+  host_project_id = var.host_project_id
 }
 
-data "google_folders" "app_script_folders" {
-  count = length(local.system_gsuite_folders) == 0 ? 0 : 1
-  parent_id = local.system_gsuite_folders[0]
-}
+# locals {
+#   service_names = [
+#                      "bigquery", "bigquerymigration", "bigquerystorage", "cloudapis",
+#                      "clouddebugger", "cloudfunctions", "cloudkms", "cloudresourcemanager",
+#                      "cloudtrace", "datastore", "iam", "iamcredentials", "logging", "monitoring",
+#                      "pubsub", "servicemanagement", "servicenetworking", "serviceusage", "sourcerepo",
+#                      "sql-component", "sqladmin", "storage-api", "storage-component", "storage"
+#                    ]
+#   services_to_enable = toset([for each in local.service_names : "${each}.googleapis.com"])
+# }
 
-locals {
-  # Get gsuite folder in organization 
-  system_gsuite_folders = [for each in data.google_folders.my-org-folders.folders : each.name if each.display_name == "uptycs"]
-  # Get appscript folder in the gsuite folder
-  system_app_script_folders = length(local.system_gsuite_folders) == 0 ? []: [for each in data.google_folders.app_script_folders[0].folders : each.name if each.display_name == "uptycs-sub-folder1"]
-  
-  projects_with_tag = toset([for each in data.google_projects.my-org-projects.projects : each.project_id if contains(keys(each.labels), "uptycs-integration")])
-  
-  # Exclude the projects in the path Organization root > system-gsuite > apps-script
-  all_project_ids = length(local.system_app_script_folders) == 0 ? toset([for each in data.google_projects.my-org-projects.projects : each.project_id]) : toset([for each in data.google_projects.my-org-projects.projects : each.project_id if each.parent.id != (split("/",local.system_app_script_folders[0]))[1]])
-  
-  projects_to_integrate = length(local.projects_with_tag) != 0 ? setunion(local.projects_with_tag, [var.host_project_id]) : local.all_project_ids
-  /*service_names = [
-                     "bigquery", "bigquerymigration", "bigquerystorage", "cloudapis",
-                     "clouddebugger", "cloudfunctions", "cloudkms", "cloudresourcemanager",
-                     "cloudtrace", "datastore", "iam", "iamcredentials", "logging", "monitoring",
-                     "pubsub", "servicemanagement", "servicenetworking", "serviceusage", "sourcerepo",
-                     "sql-component", "sqladmin", "storage-api", "storage-component", "storage"
-                   ]*/
-  //services_to_enable = toset([for each in local.service_names : "${each}.googleapis.com"])
-}
 
 //resource "google_project_service" "services_enable" {
 //   for_each = local.services_to_enable
@@ -53,7 +39,7 @@ resource "google_service_account" "sa_for_hostproject" {
 }
 
 resource "google_project_iam_member" "bind_viewer_SA_to_filter_projects" {
-  for_each   = var.set_org_level_permissions == true ? [] : local.projects_to_integrate
+  for_each   = var.set_org_level_permissions == true ? [] : module.folder_id_reader.projects_to_integrate
   project    = each.key
   role       = "roles/viewer"
 
@@ -100,7 +86,7 @@ resource "google_organization_iam_member" "bind_securityReviewer_SA_to_Organizat
 }
 
 resource "google_project_iam_member" "bind_resourceViewer_SA_to_filter_projects" {
-  for_each   = var.set_org_level_permissions == true ? [] : local.projects_to_integrate
+  for_each   = var.set_org_level_permissions == true ? [] : module.folder_id_reader.projects_to_integrate
   project    = each.key
   role       = "roles/bigquery.resourceViewer"
 
@@ -109,7 +95,7 @@ resource "google_project_iam_member" "bind_resourceViewer_SA_to_filter_projects"
 }
 
 resource "google_project_iam_member" "bind_pubsub_SA_to_filter_projects" {
-  for_each   = var.set_org_level_permissions == true ? [] : local.projects_to_integrate
+  for_each   = var.set_org_level_permissions == true ? [] : module.folder_id_reader.projects_to_integrate
   project    = each.key
   role       = "roles/pubsub.subscriber"
 
@@ -117,7 +103,7 @@ resource "google_project_iam_member" "bind_pubsub_SA_to_filter_projects" {
 }
 
 resource "google_project_iam_member" "bind_securityReviewer_SA_to_filter_projects" {
-  for_each   = var.set_org_level_permissions == true ? [] : local.projects_to_integrate
+  for_each   = var.set_org_level_permissions == true ? [] : module.folder_id_reader.projects_to_integrate
   project    = each.key
   role       = "roles/iam.securityReviewer"
 
