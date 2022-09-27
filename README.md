@@ -1,6 +1,6 @@
 # Terraform GCP module - Organization Integration for Uptycs
 
-This module provides the required GCP resources to integrate a GCP organization with Uptycs.
+This module will provision the required GCP resources inorder to integrate GCP organization with Uptycs.
 
 It integrates multiple child projects available under the organization.
 
@@ -24,12 +24,12 @@ Ensure you have the following before you execute the Terraform Script:
   * Organization Administrator
   * IAM Workload Identity Pool Admin (at Org level)
   * Service Account Admin (at Org level)
-- You need to Enable following APIs in the host-project:
+- You need to enable the following APIs on the host-project:
   * IAM Service Account Credentials API
   * Cloud Resource Manager API
-  * Cloud Pub/Sub API
+  * Cloud Pub/Sub API  (Conditional)
 - `Terraform` version should be >= 1.2.5.
-- `Gcloud` is required for authenticatication and to generate the credentials file.
+- `gcloud` is required for authenticatication and to generate the credentials file.
 
 ## Authentication:
 
@@ -56,8 +56,8 @@ To execute the Terraform script:
      # Select an existing project from your organization to host resources created by this configuration
      host_project_id = "<Host-Project-ID>"
 
-     # Set to true, If you want to give permission at organization level
-     # Set to false, If you want to give permissions at project level
+     # Set this to true If you want to give permission at organization level
+     Set this to false otherwise (If you want to give permissions per child project)
      set_org_level_permissions = true
 
      # AWS account details
