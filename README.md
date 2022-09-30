@@ -81,12 +81,6 @@ To execute the Terraform script:
    }
 
    ```
-
-**Notes**:
-
-- **If you set the flag `set_org_level_permissions` to `true`, the permissions at the organization level are attached to the service account. Any addition of a project to the organization is automatically integrated with Uptycs. You do not need to execute `step 2`.**
-- **If you set the flag `set_org_level_permissions` to `false`, proceed with `step 2`.**
-
 2. **Init, Plan and Apply**
 
    **Inputs**
