@@ -1,14 +1,14 @@
 # Terraform GCP module - Organization Integration for Uptycs
 
-This module will provision the required GCP resources inorder to integrate GCP organization with Uptycs.
+This module provides the required GCP resources to integrate a GCP organization with Uptycs.
 
-It integrates multiple child projects available under the organization.
+It integrates multiple child projects available under the GCP organization.
 
 It creates the following resources:
 
-* Service Account, Workload Identity Pool & Identity provider under host-project
-* For each project selected or for all projects in the organization, it adds IAM read permissions so Uptycs can collect telemetry
-* Read permissions for the Service Account created:
+* Service Account, Workload Identity Pool & Identity provider under host project
+* For a selected single project or for all projects in the organization, it adds IAM read permissions to allow Uptycs to collect the telemetry
+* Provides the following read permissions for the Service Account created:
   * roles/iam.securityReviewer
   * roles/bigquery.resourceViewer
   * roles/pubsub.subscriber
@@ -19,19 +19,20 @@ It creates the following resources:
 
 Ensure you have the following before you execute the Terraform Script:
 
-- You need to have the following privileges to apply the configuration:
-
+- The following privileges to apply the configuration:
   * Organization Administrator
   * IAM Workload Identity Pool Admin (at Org level)
   * Service Account Admin (at Org level)
-- You need to enable the following APIs on the host-project:
+- The following APIs enabled on the host project:
   * IAM Service Account Credentials API
   * Cloud Resource Manager API
   * Cloud Pub/Sub API  (Conditional)
-- `Terraform` version should be >= 1.2.5.
-- `gcloud` is required for authenticatication and to generate the credentials file.
+- The `terraform` version should be >= 1.2.5.
+- The `gcloud` is required to get authenticated and generate the credentials file.
 
-## Authentication:
+## Authentication
+
+To authenticate GCP account using gcloud use the following command:
 
 ```
 Login with ADC
@@ -83,7 +84,7 @@ To execute the Terraform script:
 
 **Notes**:
 
-- **If you set the flag `set_org_level_permissions` to `true`, the permissions at the organization level are attached to the service account. Any addition of a project to the organization is automatically integrated with Uptycs. You do not need to execute `step 2` again.**
+- **If you set the flag `set_org_level_permissions` to `true`, the permissions at the organization level are attached to the service account. Any addition of a project to the organization is automatically integrated with Uptycs. You do not need to execute `step 2`.**
 - **If you set the flag `set_org_level_permissions` to `false`, proceed with `step 2`.**
 
 2. **Init, Plan and Apply**
@@ -92,8 +93,8 @@ To execute the Terraform script:
 
 
    | Name                      | Description                                                           | Type           | Default                 |
-   | --------------------------- | ----------------------------------------------------------------------- | ---------------- | ------------------------- |
-   | organization_id           | The GCP parent organizations ID where resources are created           | `string`       | Required                |
+   | ------------------------- | --------------------------------------------------------------------- | -------------- | ----------------------- |
+   | organization_id           | The GCP parent organization ID where resources are created            | `string`       | Required                |
    | integration_name          | Unique phrase used to name the resources                              | `string`       | `"uptycs-int-20220101"` |
    | service_account_name      | The service account name that is created in the host project          | `string`       | `"sa-for-uptycs"`       |
    | host_project_id           | GCP Project ID under which Uptycs should create required resources    | `string`       | Required                |
@@ -119,9 +120,9 @@ To execute the Terraform script:
 
 **Notes**:
 
-- Update `integration_name` to change the name of the resources WIP and IdP.
-- Notes on `terraform destroy`
+- Update `integration_name` to specify the name of the resources WIP and IdP.
+- Notes on `terraform destroy`:
   - Soft deleted provider can be restored using `UndeleteWorkloadIdentityPoolProvider`
-  - `integration_name` cannot be re-used until the WIP is permanently deleted
+  - The same `integration_name` cannot be re-used until the WIP is permanently deleted
   - Same WIP cannot be created again
 - Run the command returned by `credential-file-gen-command` to re-generate the `credentials.json` file.
