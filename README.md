@@ -49,7 +49,7 @@ To execute the Terraform script:
 
    ```
    module "create-gcp-cred" {
-     source                    = "github.com/uptycslabs/terraform-google-gcp-integration"
+     source                    = "uptycslabs/gcp-integration/google"
      organization_id           = "<GCP-ORGANIZATION-ID>"
      integration_name          = "uptycs-int-20220101"
      service_account_name      = "sa-for-uptycs"
@@ -58,7 +58,7 @@ To execute the Terraform script:
      host_project_id = "<Host-Project-ID>"
 
      # Set this to true If you want to give permission at organization level
-     Set this to false otherwise (If you want to give permissions per child project)
+     # Set this to false otherwise (If you want to give permissions per child project)
      set_org_level_permissions = true
 
      # AWS account details
