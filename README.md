@@ -14,6 +14,7 @@ It creates the following resources:
   * roles/pubsub.subscriber
   * roles/viewer
   * roles/browser
+  * roles/iam.roleAdmin
 
 ## Prerequisites
 
