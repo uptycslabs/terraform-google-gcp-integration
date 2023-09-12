@@ -159,6 +159,13 @@ resource "google_organization_iam_member" "bind_role_for_uptycs" {
   members  = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
 }
 
+resource "google_project_iam_member" "bind_role_for_uptycs" {
+  for_each   = var.set_org_level_permissions == true ? [] : module.folder_id_reader.projects_to_integrate
+  role    = "organizations/${var.organization_id}/roles/${var.integration_name}-role"
+  org_id = var.organization_id
+  members  = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
+}
+
 resource "null_resource" "cred_config_json" {
   provisioner "local-exec" {
     command     = "gcloud iam workload-identity-pools create-cred-config projects/${data.google_project.my_host_project.number}/locations/global/workloadIdentityPools/${google_iam_workload_identity_pool.create_wip.workload_identity_pool_id}/providers/${google_iam_workload_identity_pool_provider.add_provider.workload_identity_pool_provider_id} --service-account=${google_service_account.sa_for_hostproject.email} --output-file=credentials.json --aws"
