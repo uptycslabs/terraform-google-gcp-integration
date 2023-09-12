@@ -141,23 +141,22 @@ resource "google_service_account_iam_binding" "workload_identity_binding" {
   depends_on = [google_iam_workload_identity_pool.create_wip]
 }
 
-resource "google_project_iam_custom_role" "role_for_uptycs" {
-  role_id     = "roleForUptycs"
+resource "google_organization_iam_custom_role" "role_for_uptycs" {
+  role_id     = "${var.integration_name}-role"
   title       = "Role for Uptycs"
   description = "Uptycs Custom Terraform Role"
   permissions = [
     "serviceusage.services.use", 
     "storage.buckets.get"
   ]
-  project = var.gcp_project_id
+  org_id = var.organization_id
 }
 
-resource "google_project_iam_binding" "bind_role_for_uptycs" {
-  role    = "projects/${var.gcp_project_id}/roles/roleForUptycs"
-  project = var.gcp_project_id
-  members  = [
-    var.service_account_exists == false ? "serviceAccount:${google_service_account.sa_for_cloudquery[0].email}" : "serviceAccount:${data.google_service_account.myaccount[0].email}"
-  ]
+resource "google_organization_iam_member" "bind_role_for_uptycs" {
+  count = var.set_org_level_permissions == true ? 1 : 0
+  role    = "organizations/${var.organization_id}/roles/${var.integration_name}-role"
+  org_id = var.organization_id
+  members  = "serviceAccount:${google_service_account.sa_for_hostproject.email}"
 }
 
 resource "null_resource" "cred_config_json" {
