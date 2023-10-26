@@ -66,6 +66,10 @@ To execute the Terraform script:
      # Uptycs' UI: "Cloud"->"GCP"->"Integrations"->"ORGANIZATION INTEGRATION"
      host_aws_account_id     = "<AWS account id>"
      host_aws_instance_roles  = ["Role_Allinone", "Role_PNode", "Role_Cloudquery"]
+   
+     # AWS account details
+     # Set this to skip execution of local commands like "gcloud"
+     skip_local_exec = false
    }
 
    output "host-project-id" {
@@ -87,7 +91,7 @@ To execute the Terraform script:
 
 
    | Name                      | Description                                                           | Type           | Default                 |
-   | ------------------------- | --------------------------------------------------------------------- | -------------- | ----------------------- |
+---------------------------| ------------------------- | --------------------------------------------------------------------- | -------------- | ----------------------- |
    | organization_id           | The GCP parent organization ID where resources are created            | `string`       | Required                |
    | integration_name          | Unique phrase used to name the resources                              | `string`       | `"uptycs-int-20220101"` |
    | service_account_name      | The service account name that is created in the host project          | `string`       | `"sa-for-uptycs"`       |
@@ -95,6 +99,7 @@ To execute the Terraform script:
    | host_aws_account_id       | AWS account ID of Uptycs - for federated identity                     | `string`       | Required                |
    | host_aws_instance_roles   | AWS role names of Uptycs - for identity binding                       | `list(string)` | Required                |
    | set_org_level_permissions | The flag to choose permissions at organization level or project level | `bool`         | true                    |
+   | skip_local_exec           | Flag to skip local command execution                                  | `bool`         | false                   |
 
    **Outputs**
 
